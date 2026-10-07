@@ -2,8 +2,8 @@
 {% block content %}
   {% if premiere_fois %}
   <div class="banner-ok">
-    Bienvenue ! Renseignez au moins l'adresse et la cle API de votre ecran pour commencer -
-    ces reglages ne changent quasiment jamais, vous n'aurez plus besoin d'y revenir ensuite.
+    Welcome! Enter at least your Stream Deck address and API key to get started.
+    These settings rarely change, so you normally will not need to come back here.
   </div>
   {% endif %}
 
@@ -11,80 +11,134 @@
     {% if premiere_fois %}<input type="hidden" name="premiere_fois" value="1">{% endif %}
 
     <div class="card">
-      <h2>Connexion a l'ecran</h2>
+      <h2>Device connection</h2>
+
       <div class="grid2">
         <div>
-          <label>Adresse (IP du Stream Deck)</label>
-          <input type="text" name="conn_host" value="{{ connection.host or '' }}" placeholder="192.168.1.42">
+          <label>Address (Stream Deck IP)</label>
+          <input
+            type="text"
+            name="conn_host"
+            value="{{ connection.host or '' }}"
+            placeholder="192.168.1.42">
         </div>
+
         <div>
           <label>Port</label>
-          <input type="text" name="conn_port" value="{{ connection.port or 6053 }}">
+          <input
+            type="text"
+            name="conn_port"
+            value="{{ connection.port or 6053 }}">
         </div>
       </div>
-      <label>Cle API (meme valeur que firmware/secrets.yaml)</label>
-      <input type="text" name="conn_key" value="{{ connection.api_key or '' }}">
-      <p class="hint">Repris automatiquement au prochain essai de reconnexion (jusqu'a ~10s) - pas besoin de redemarrer l'icone.</p>
+
+      <label>API key (same value as firmware/secrets.yaml)</label>
+      <input
+        type="text"
+        name="conn_key"
+        value="{{ connection.api_key or '' }}">
+
+      <p class="hint">
+        Connection settings are automatically picked up on the next reconnect
+        attempt (usually within ~10 seconds). No application restart is required.
+      </p>
     </div>
 
     <div class="card">
-      <h2>Apparence</h2>
-      <label>Forme des boutons</label>
+      <h2>Appearance</h2>
+
+      <label>Button shape</label>
       <select name="shape">
-        <option value="carre" {% if shape != "rond" %}selected{% endif %}>Carre</option>
-        <option value="rond" {% if shape == "rond" %}selected{% endif %}>Rond</option>
+        <option value="carre" {% if shape != "rond" %}selected{% endif %}>Square</option>
+        <option value="rond" {% if shape == "rond" %}selected{% endif %}>Round</option>
       </select>
     </div>
 
     <div class="card">
-      <h2>Home Assistant (facultatif)</h2>
+      <h2>Home Assistant (optional)</h2>
+
       <div class="grid2">
         <div>
-          <label>URL (ex http://homeassistant.local:8123)</label>
-          <input type="text" name="ha_url" value="{{ home_assistant.url or '' }}">
+          <label>URL (example: http://homeassistant.local:8123)</label>
+          <input
+            type="text"
+            name="ha_url"
+            value="{{ home_assistant.url or '' }}">
         </div>
+
         <div>
-          <label>Jeton d'acces longue duree</label>
-          <input type="text" name="ha_token" value="{{ home_assistant.token or '' }}">
+          <label>Long-lived access token</label>
+          <input
+            type="text"
+            name="ha_token"
+            value="{{ home_assistant.token or '' }}">
         </div>
       </div>
+
       <p class="hint">
-        Genere dans HA : profil utilisateur &rarr; bas de page &rarr; "Jetons d'acces longue duree".
-        Necessaire pour les emplacements type "barre"/"texte" avec une source HA, et pour les actions type "home_assistant".
+        Create the token in Home Assistant from your user profile under
+        "Long-Lived Access Tokens".
+        It is required for bar/text widgets using Home Assistant entities and
+        for Home Assistant actions.
       </p>
     </div>
 
     <div class="card">
-      <h2>MQTT (facultatif)</h2>
+      <h2>MQTT (optional)</h2>
+
       <div class="grid2">
         <div>
-          <label>Hote du broker</label>
-          <input type="text" name="mqtt_host" value="{{ mqtt.host or '' }}" placeholder="192.168.1.10">
+          <label>Broker host</label>
+          <input
+            type="text"
+            name="mqtt_host"
+            value="{{ mqtt.host or '' }}"
+            placeholder="192.168.1.10">
         </div>
+
         <div>
           <label>Port</label>
-          <input type="text" name="mqtt_port" value="{{ mqtt.port or 1883 }}">
+          <input
+            type="text"
+            name="mqtt_port"
+            value="{{ mqtt.port or 1883 }}">
         </div>
+
         <div>
-          <label>Utilisateur (facultatif)</label>
-          <input type="text" name="mqtt_username" value="{{ mqtt.username or '' }}">
+          <label>Username (optional)</label>
+          <input
+            type="text"
+            name="mqtt_username"
+            value="{{ mqtt.username or '' }}">
         </div>
+
         <div>
-          <label>Mot de passe (facultatif)</label>
-          <input type="password" name="mqtt_password" value="{{ mqtt.password or '' }}">
+          <label>Password (optional)</label>
+          <input
+            type="password"
+            name="mqtt_password"
+            value="{{ mqtt.password or '' }}">
         </div>
       </div>
-      <label>Sujet de base</label>
-      <input type="text" name="mqtt_base_topic" value="{{ mqtt.base_topic or 'homeassistant/state' }}">
+
+      <label>Base topic</label>
+      <input
+        type="text"
+        name="mqtt_base_topic"
+        value="{{ mqtt.base_topic or 'homeassistant/state' }}">
+
       <p class="hint">
-        Rend la mise a jour des emplacements barre/texte/couleur quasi instantanee au lieu d'attendre le sondage
-        toutes les 15s. Necessite l'integration <code>mqtt_statestream</code> cote Home Assistant, avec le meme
-        "Sujet de base" (<code>base_topic</code>) - voir le README de l'appli PC. Laisser l'hote vide desactive
-        MQTT (le sondage REST classique continue de fonctionner). Un redemarrage de l'appli est necessaire apres
-        modification de ces reglages.
+        MQTT provides near real-time updates for bar, text and light-color
+        widgets instead of waiting for the normal ~15-second REST polling cycle.
+        It requires Home Assistant's <code>mqtt_statestream</code> integration
+        using the same <code>base_topic</code>.
+        Leave the broker host empty to disable MQTT.
+        The application must currently be restarted after changing MQTT settings.
       </p>
     </div>
 
-    <button type="submit">{{ "Continuer vers l'accueil" if premiere_fois else "Enregistrer" }}</button>
+    <button type="submit">
+      {{ "Continue to Home" if premiere_fois else "Save" }}
+    </button>
   </form>
 {% endblock %}
