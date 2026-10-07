@@ -14,7 +14,7 @@ let selectedAppTarget = null;
 function loadAppLibraryIfNeeded() {
   if (appLibrary !== null) { renderAppGrid(); return; }
   const status = document.getElementById("modal-app-status");
-  status.textContent = "Chargement de la bibliotheque d'applications...";
+  status.textContent = "Loading application library...";
   Promise.all([
     fetch("/installed-apps").then((r) => r.json()),
     fetch("/open-windows").then((r) => r.json()),
@@ -26,13 +26,13 @@ function loadAppLibraryIfNeeded() {
         open: (openWindows.windows || []).map((w) => ({ name: w.title, target: w.target })),
       };
       status.textContent = installed.detect_error
-        ? "Detection automatique indisponible sur ce systeme - ajoutez vos applications avec \"+ Ajouter\"."
+        ? "Automatic detection is unavailable on this system. Add applications manually with \"+ Add\"."
         : "";
       renderAppGrid();
     })
     .catch(() => {
       appLibrary = { detected: [], custom: [], open: [] };
-      status.textContent = "Impossible de charger la bibliotheque d'applications.";
+      status.textContent = "Unable to load the application library.";
       renderAppGrid();
     });
 }
@@ -58,7 +58,7 @@ function renderAppGrid() {
 
   const addTile = document.createElement("div");
   addTile.className = "app-tile add-tile";
-  addTile.title = "Ajouter une application a la bibliotheque";
+  addTile.title = "Add an application to the library";
   addTile.innerHTML = '<div class="app-icon">+</div><div class="app-name">Ajouter...</div>';
   addTile.addEventListener("click", addCustomApp);
   grid.appendChild(addTile);

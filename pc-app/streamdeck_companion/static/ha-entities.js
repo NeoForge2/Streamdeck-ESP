@@ -42,7 +42,7 @@ function renderEntityList(listId, query, onSelect, domainFilter) {
   if (!filtered.length) {
     const empty = document.createElement("p");
     empty.className = "hint";
-    empty.textContent = q ? "Aucune entite trouvee." : "Tapez pour rechercher parmi vos entites.";
+    empty.textContent = q ? "No entities found." : "Type to search your entities.";
     list.appendChild(empty);
     return;
   }

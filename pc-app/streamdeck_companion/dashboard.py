@@ -62,22 +62,22 @@ ENCODER_ACTION_TYPES = ACTION_TYPES
 # home.html) - les noms techniques ci-dessus (ACTION_TYPES) restent les
 # valeurs stockees en config/comparees en JS, seul le texte affiche change.
 ACTION_TYPE_LABELS = {
-    "none": "Aucune",
-    "keys": "Raccourci clavier",
-    "launch": "Lancer une application",
-    "url": "Ouvrir un site web",
-    "media": "Musique / volume du PC",
-    "home_assistant": "Action Home Assistant (ex: allumer, eteindre, basculer...)",
-    "audio_output": "Changer de haut-parleur",
-    "app_volume": "Volume d'une application",
-    "app_mute": "Couper le son d'une application",
-    "ha_adjust": "Ajuster un appareil Home Assistant",
+    "none": "None",
+    "keys": "Keyboard shortcut",
+    "launch": "Launch an application",
+    "url": "Open a website",
+    "media": "PC media / volume",
+    "home_assistant": "Home Assistant action",
+    "audio_output": "Change audio output",
+    "app_volume": "Application volume",
+    "app_mute": "Mute an application",
+    "ha_adjust": "Adjust a Home Assistant device",
 }
 SLOT_TYPES = ["bouton", "barre", "texte"]
 SLOT_TYPE_LABELS = {
-    "bouton": "Bouton - declenche une action au clic",
-    "barre": "Jauge - affiche une valeur Home Assistant en barre (ex: batterie, luminosite)",
-    "texte": "Texte - affiche une valeur Home Assistant en chiffres (ex: temperature)",
+    "bouton": "Button - triggers an action when pressed",
+    "barre": "Bar - displays a Home Assistant value (e.g. battery, brightness)",
+    "texte": "Text - displays a Home Assistant value (e.g. temperature)",
 }
 DIRECTIONS = ["clockwise", "anticlockwise", "press"]
 
@@ -322,7 +322,7 @@ def force_profile():
     d'editer sans attendre que son application soit au premier plan)."""
     name = request.form.get("name", "")
     if _device_client is None:
-        return jsonify({"error": "Non connecte a l'ecran"}), 400
+        return jsonify({"error": "Not connected to the device"}), 400
     try:
         _device_client.schedule_force_profile(name)
     except Exception as exc:
@@ -370,13 +370,13 @@ def _ha_error_message(exc: Exception) -> str:
     exceptions brutes de `requests` (NameResolutionError, stack complet...)
     ne veulent rien dire pour quelqu'un qui configure juste une URL."""
     if isinstance(exc, requests.exceptions.Timeout):
-        return "Home Assistant ne repond pas (delai depasse) - verifiez l'URL dans Reglages."
+        return "Home Assistant did not respond in time - check the URL in Settings."
     if isinstance(exc, requests.exceptions.ConnectionError):
-        return "Impossible de joindre Home Assistant - verifiez l'URL dans Reglages."
+        return "Unable to reach Home Assistant - check the URL in Settings."
     if isinstance(exc, requests.exceptions.HTTPError):
         status = exc.response.status_code if exc.response is not None else None
         if status == 401:
-            return "Cle d'acces Home Assistant refusee - verifiez le jeton dans Reglages."
+            return "Home Assistant access token rejected - check the token in Settings."
         return f"Home Assistant a repondu une erreur (code {status})."
     return str(exc)
 
@@ -390,7 +390,7 @@ def ha_entities():
     ha_conf = config.get("home_assistant") or {}
     client = ha_client.HomeAssistantClient(ha_conf.get("url", ""), ha_conf.get("token", ""))
     if not client.configured:
-        return jsonify({"entities": [], "error": "Home Assistant n'est pas configure (voir Reglages)."})
+        return jsonify({"entities": [], "error": "Home Assistant is not configured. Open Settings first."})
     try:
         entities = client.list_entities()
     except Exception as exc:

@@ -46,7 +46,7 @@ function renderIconPicker(selectedIcon, query) {
   iconPicker.innerHTML = "";
   const noneChoice = document.createElement("div");
   noneChoice.className = "icon-choice none-choice" + (selectedIcon ? "" : " selected");
-  noneChoice.textContent = "Aucune";
+  noneChoice.textContent = "None";
   noneChoice.dataset.icon = "";
   noneChoice.addEventListener("click", () => selectIcon(""));
   iconPicker.appendChild(noneChoice);
@@ -69,7 +69,7 @@ function renderIconPicker(selectedIcon, query) {
   if (q && choices.length === 0) {
     const empty = document.createElement("p");
     empty.className = "hint";
-    empty.textContent = "Aucune icone trouvee.";
+    empty.textContent = "No icons found.";
     iconPicker.appendChild(empty);
   }
 }
@@ -253,7 +253,7 @@ function makeSlotTile(entry, physIndex, isGrid) {
 
   const label = document.createElement("div");
   label.className = "label";
-  label.textContent = entry.label || "Bouton";
+  label.textContent = entry.label || "Button";
   tile.appendChild(label);
 
   /* Sur le vrai ecran, "barre"/"texte" affichent une jauge ou une valeur
@@ -325,7 +325,7 @@ screenGrid.addEventListener("drop", (e) => {
   if (src.kind === "library") {
     const freeIdx = slots.findIndex((s) => !s.library_id);
     if (freeIdx === -1) {
-      alert("Tous les emplacements physiques de l'ecran sont deja utilises - retirez-en un d'abord (glissez-le vers la bibliotheque).");
+      alert("All physical screen slots are already in use. Remove one first by dragging it back to the library.");
       return;
     }
     let candidate = { col: target.col, row: target.row, colspan: 1, rowspan: 1 };
@@ -385,7 +385,7 @@ function makeWeatherTile(isGrid) {
 
   const label = document.createElement("div");
   label.className = "label";
-  label.textContent = weather.entity ? "Meteo" : "Meteo (non configuree)";
+  label.textContent = weather.entity ? "Weather" : "Weather (not configured)";
   tile.appendChild(label);
 
   const value = document.createElement("div");
@@ -463,7 +463,7 @@ function updateLaunchPickerVisibility() {
   const isLaunch = document.getElementById("modal-action-type").value === "launch";
   document.getElementById("modal-app-library").style.display = isLaunch ? "block" : "none";
   document.getElementById("modal-action-target").placeholder = isLaunch
-    ? "Choisissez une application ci-dessus, ou tapez une commande"
+    ? "Choose an application above, or enter a command"
     : "ctrl+shift+s / https://... / vol_up / light.toggle:light.bureau";
   if (isLaunch) loadAppLibraryIfNeeded();
   updateHaActionVisibility();
@@ -544,7 +544,7 @@ document.getElementById("modal-apply").addEventListener("click", () => {
   if (currentLibraryId === null) return;
   const entry = libraryEntry(currentLibraryId);
   if (!entry) return;
-  entry.label = document.getElementById("modal-label").value.trim() || "Bouton";
+  entry.label = document.getElementById("modal-label").value.trim() || "Button";
   entry.type = document.getElementById("modal-type").value;
   entry.icon = modal.dataset.selectedIcon || "";
   entry.action = { type: document.getElementById("modal-action-type").value, target: null };
@@ -633,7 +633,7 @@ function populateSimpleAppPicker() {
   select.innerHTML = "";
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "Choisir une application...";
+  placeholder.textContent = "Choose an application...";
   select.appendChild(placeholder);
   (audioSessions || []).forEach((session) => {
     const opt = document.createElement("option");
@@ -763,7 +763,7 @@ function populateEncoderAppPicker(direction) {
   select.innerHTML = "";
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "Choisir une application...";
+  placeholder.textContent = "Choose an application...";
   select.appendChild(placeholder);
   (audioSessions || []).forEach((session) => {
     const opt = document.createElement("option");

@@ -111,9 +111,9 @@ def build_menu(config: dict, device_client: DeviceClient) -> pystray.Menu:
         webbrowser.open(ha_url)
 
     def active_profile_label(_item):
-        name = device_client.active_profile_name or "Defaut"
+        name = device_client.active_profile_name or "Default"
         suffix = " (fige)" if device_client.manual_override else " (auto)"
-        return f"Profil actif : {name}{suffix}"
+        return f"Active profile: {name}{suffix}"
 
     def resume_auto(_icon, _item):
         device_client.schedule_clear_override()
@@ -129,9 +129,9 @@ def build_menu(config: dict, device_client: DeviceClient) -> pystray.Menu:
             "Reprendre la bascule automatique", resume_auto,
             visible=lambda _item: bool(device_client.manual_override),
         ),
-        pystray.MenuItem("Configurer le Stream Deck", open_dashboard, default=True),
-        pystray.MenuItem("Ouvrir Home Assistant", open_home_assistant),
-        pystray.MenuItem("Quitter", quit_app),
+        pystray.MenuItem("Configure Stream Deck", open_dashboard, default=True),
+        pystray.MenuItem("Open Home Assistant", open_home_assistant),
+        pystray.MenuItem("Quit", quit_app),
     )
 
 

@@ -236,9 +236,9 @@ A slot can use one of three main types:
 
 | Type | Description |
 |---|---|
-| `button` | Executes an action when pressed |
-| `bar` | Displays a 0–100 value from Home Assistant |
-| `text` | Displays a Home Assistant state and unit |
+| `bouton` | Executes an action when pressed |
+| `barre` | Displays a 0–100 value from Home Assistant |
+| `texte` | Displays a Home Assistant state and unit |
 
 Home Assistant-backed widgets are refreshed through the REST API approximately
 every 15 seconds by default.
@@ -577,7 +577,7 @@ firmware/color_mode_panel.yaml
 
 # Touch-adjustable bar widgets
 
-A `bar` widget linked to a supported Home Assistant entity can be adjusted
+A `barre` widget linked to a supported Home Assistant entity can be adjusted
 directly from the touchscreen.
 
 Touch:

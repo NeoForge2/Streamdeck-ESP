@@ -28,7 +28,7 @@ function renderProfileTabs() {
     if (profile.name === liveActiveProfileName) {
       const dot = document.createElement("span");
       dot.className = "live-dot";
-      dot.title = "Actif sur l'ecran en ce moment";
+      dot.title = "Currently active on the device";
       tab.appendChild(dot);
     }
 
@@ -49,7 +49,7 @@ function renderProfileTabs() {
 
   const addTab = document.createElement("div");
   addTab.className = "profile-tab add-tab";
-  addTab.textContent = "+ Nouveau profil";
+  addTab.textContent = "+ New profile";
   addTab.addEventListener("click", () => openProfileModal(null));
   tabs.appendChild(addTab);
 
@@ -59,11 +59,11 @@ function renderProfileTabs() {
 function updateProfileStatusUI() {
   const text = document.getElementById("profile-status-text");
   if (manualOverride) {
-    text.textContent = `Profil force manuellement : ${liveActiveProfileName || "?"}`;
+    text.textContent = `Manually forced profile: ${liveActiveProfileName || "?"}`;
   } else if (liveActiveProfileName) {
-    text.textContent = `Bascule automatique - actif en ce moment : ${liveActiveProfileName}`;
+    text.textContent = `Automatic switching - currently active: ${liveActiveProfileName}`;
   } else {
-    text.textContent = "Bascule automatique indisponible (Windows uniquement) - basculez manuellement avec \"Forcer ce profil\".";
+    text.textContent = "Automatic profile switching is unavailable on this platform. Use \"Force this profile\" to switch manually.";
   }
   document.getElementById("profile-auto-btn").style.display = manualOverride ? "inline-block" : "none";
 }
@@ -88,7 +88,7 @@ document.getElementById("profile-force-btn").addEventListener("click", () => {
   })
     .then((r) => r.json())
     .then((data) => {
-      if (data.error) { alert("Impossible de forcer ce profil : " + data.error); return; }
+      if (data.error) { alert("Unable to force this profile: " + data.error); return; }
       liveActiveProfileName = data.active_profile_name;
       manualOverride = true;
       renderProfileTabs();
@@ -133,7 +133,7 @@ function makeDefaultWeather() {
 function openProfileModal(index) {
   editingProfileIndex = index;
   const isNew = index === null;
-  document.getElementById("profile-modal-title").textContent = isNew ? "Nouveau profil" : "Modifier le profil";
+  document.getElementById("profile-modal-title").textContent = isNew ? "New profile" : "Edit profile";
   document.getElementById("profile-modal-name").value = isNew ? "" : profiles[index].name;
   document.getElementById("profile-modal-trigger").value = isNew ? "" : ((profiles[index].trigger && profiles[index].trigger.process) || "");
   document.getElementById("profile-modal-delete").style.display = (isNew || profiles.length <= 1) ? "none" : "inline-block";
@@ -155,12 +155,12 @@ document.getElementById("profile-modal-cancel").addEventListener("click", closeP
 function loadOpenWindows() {
   const select = document.getElementById("profile-modal-open-windows");
   const status = document.getElementById("profile-modal-open-windows-status");
-  select.innerHTML = '<option value="">— Chargement des applications ouvertes... —</option>';
+  select.innerHTML = '<option value="">— Loading open applications... —</option>';
   fetch("/open-windows")
     .then((r) => r.json())
     .then((data) => {
       const windows = data.windows || [];
-      select.innerHTML = '<option value="">— Choisir une application ouverte —</option>';
+      select.innerHTML = '<option value="">— Choose an open application —</option>';
       windows.forEach((w) => {
         const opt = document.createElement("option");
         opt.value = w.process;
@@ -169,7 +169,7 @@ function loadOpenWindows() {
       });
       status.textContent = windows.length
         ? ""
-        : "Aucune application detectee - fonctionnalite Windows uniquement, ou tapez le nom du processus a la main ci-dessous.";
+        : "No applications detected. Automatic detection is currently Windows-only; enter the process name manually below.";
     })
     .catch(() => {
       select.innerHTML = '<option value="">— Indisponible —</option>';
@@ -187,7 +187,7 @@ document.getElementById("profile-modal-open-windows").addEventListener("change",
 });
 
 document.getElementById("profile-modal-save").addEventListener("click", () => {
-  const name = document.getElementById("profile-modal-name").value.trim() || "Profil";
+  const name = document.getElementById("profile-modal-name").value.trim() || "Profile";
   const triggerProcess = document.getElementById("profile-modal-trigger").value.trim();
   const trigger = triggerProcess ? { process: triggerProcess } : null;
   if (editingProfileIndex === null) {
@@ -207,7 +207,7 @@ document.getElementById("profile-modal-save").addEventListener("click", () => {
 
 document.getElementById("profile-modal-delete").addEventListener("click", () => {
   if (editingProfileIndex === null || profiles.length <= 1) return;
-  if (!confirm(`Supprimer le profil "${profiles[editingProfileIndex].name}" ?`)) return;
+  if (!confirm(`Delete profile "${profiles[editingProfileIndex].name}"?`)) return;
   profiles.splice(editingProfileIndex, 1);
   closeProfileModal();
   switchProfileTab(Math.min(activeEditIndex, profiles.length - 1));
