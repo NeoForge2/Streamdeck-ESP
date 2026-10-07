@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Stream Deck</title>
@@ -12,16 +12,19 @@
 <nav class="topnav">
   <div class="brand">STREAM DECK</div>
   <div class="nav-links">
-    <a href="{{ url_for('index') }}" class="{{ 'active' if active_page == 'home' else '' }}">Accueil</a>
-    <a href="{{ url_for('settings') }}" class="{{ 'active' if active_page == 'settings' else '' }}">&#9881; Reglages</a>
+    <a href="{{ url_for('index') }}" class="{{ 'active' if active_page == 'home' else '' }}">Home</a>
+    <a href="{{ url_for('settings') }}" class="{{ 'active' if active_page == 'settings' else '' }}">&#9881; Settings</a>
   </div>
 </nav>
+
 <div class="page">
-  {% if error %}<div class="banner-err">Echec : {{ error }}</div>{% endif %}
-  {% if saved %}<div class="banner-ok">Enregistre et envoye a l'ecran.</div>{% endif %}
+  {% if error %}<div class="banner-err">Error: {{ error }}</div>{% endif %}
+  {% if saved %}<div class="banner-ok">Saved and sent to the device.</div>{% endif %}
   {% block content %}{% endblock %}
 </div>
+
 {% block scripts %}{% endblock %}
+
 <script src="{{ url_for('static', filename='property-inspector.js') }}"></script>
 <script src="{{ url_for('static', filename='action-library.js') }}"></script>
 </body>
