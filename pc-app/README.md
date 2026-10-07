@@ -1,365 +1,478 @@
-# Appli compagnon PC
+# PC Companion Application
 
-Deux pages, comme gerer les pages d'applications sur un telephone :
+The PC companion is the main configuration and runtime application for
+Streamdeck-ESP.
 
-- **Accueil** : un ou plusieurs **profils** (onglets), chacun avec sa
-  propre grille de 36 emplacements ET ses 3 encodeurs - chaque
-  emplacement/encodeur se configure via sa propre popup (glisser-deposer
-  pour reordonner les emplacements). L'ecran **bascule automatiquement**
-  sur le bon profil selon l'application au premier plan sur le PC (ex : la
-  grille change toute seule en passant sur OBS, Discord, un jeu...) - voir
-  "Profils par application" plus bas. C'est la seule page dont vous avez
-  besoin au quotidien.
-- **Reglages** (icone &#9881;) : connexion a l'ecran, cle API, Home
-  Assistant, forme des boutons - demandee automatiquement au tout premier
-  lancement, puis on n'y revient quasiment plus.
+It runs in the system tray, connects directly to the ESPHome device and manages:
 
-Tourne en icone dans la barre des taches (pas de fenetre de terminal), se
-connecte directement au Stream Deck (pas besoin de Home Assistant pour que
-ca fonctionne - meme si HA continue de voir l'appareil nativement en
-parallele, et peut en plus alimenter des widgets en temps reel, voir plus
-bas).
+- profiles
+- button layouts
+- rotary encoders
+- actions
+- application launching
+- Windows audio controls
+- Home Assistant integration
+- live widgets
+- application icons
+- plugins
+
+Home Assistant is optional. The Stream Deck can be used as a standalone PC
+macro controller.
 
 ## Installation
 
+From the repository root:
+
 ```bash
 cd pc-app
-python3 -m venv .venv
-source .venv/bin/activate   # .venv\Scripts\activate sur Windows
+python -m venv .venv
+```
+
+Activate the virtual environment.
+
+### Windows
+
+```powershell
+.venv\Scripts\activate
+```
+
+### Linux / macOS
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
 pip install -r requirements.txt
 ```
 
-Pas de fichier a copier a la main : au tout premier lancement, l'appli
-cree `dashboard_config.yaml` automatiquement (vide) et vous redirige vers
-la page **Reglages** pour renseigner l'IP de l'ecran et la cle API (meme
-valeur que `firmware/secrets.yaml` ; l'IP se trouve dans Home Assistant :
-l'appareil "Stream Deck" > Adresse IP). Une fois valide, vous arrivez sur
-l'accueil et n'avez plus besoin d'y retoucher.
+No configuration file needs to be copied manually.
 
-## Lancer au quotidien (recommande)
+On first launch, the application automatically creates:
 
-Icone de barre des taches, pas de terminal a garder ouvert :
+```text
+dashboard_config.yaml
+```
+
+and opens the Settings page so you can configure the device connection.
+
+`dashboard_config.yaml` contains local configuration and must not be committed.
+
+---
+
+## Recommended daily usage
+
+Run the application in the system tray:
 
 ```powershell
 pythonw -m streamdeck_companion.tray
 ```
 
-Pour qu'elle demarre automatiquement a l'ouverture de session Windows :
+On Windows, automatic startup can be installed with:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File install_startup.ps1
 ```
 
-Clic sur l'icone (ou "Configurer le Stream Deck" dans son menu) pour
-ouvrir la page de configuration - `http://127.0.0.1:8080`.
+Click the tray icon, or choose **Configure Stream Deck**, to open the dashboard:
 
-## Lancer manuellement (sans icone, avec logs dans le terminal)
+```text
+http://127.0.0.1:8080
+```
+
+### Run manually with terminal logs
+
+For development or troubleshooting:
 
 ```bash
 python -c "from streamdeck_companion.tray import main; main()"
 ```
 
-## Les 2 pages
+---
 
-### Accueil (`/`)
+# Interface
 
-Une maquette fidele de l'ecran (memes proportions 1024x600, meme
-disposition header/grille/encodeurs/statut, tuiles carrees ou rondes selon
-vos reglages) : ce que vous voyez dans le navigateur correspond vraiment a
-ce qui s'affichera sur l'ecran physique, avant meme d'envoyer.
+The companion application contains two main pages:
 
-- Les boutons **affiches** apparaissent dans la maquette d'ecran, a la
-  meme place qu'ils occuperont reellement.
-- Sous la maquette, la **bibliotheque** liste tous les boutons enregistres
-  qui ne sont pas actuellement affiches - PAS limitee, contrairement
-  a l'ecran physique. Enregistrez-en autant que vous voulez (raccourcis,
-  scenes HA, jeux...) pour les reutiliser plus tard, sans jamais etre
-  bloque - seuls 36 au maximum peuvent etre affiches simultanement (limite
-  materielle de l'ecran : 36 boutons physiques dans le firmware, un par
-  case de la grille invisible 9x4).
-- Cliquez une tuile (affichee ou dans la bibliotheque) pour ouvrir sa
-  popup de reglages (libelle, icone, type, action) - un bouton "+" dans la
-  bibliotheque pour en creer un nouveau.
-- **Glissez-deposez** un bouton pour l'afficher/le retirer de l'ecran (le
-  retirer ne le supprime pas, il retourne juste dans la bibliotheque) -
-  bien plus direct qu'une case a cocher "Visible" a chercher dans une
-  popup. Pour supprimer definitivement un bouton, ouvrez sa popup et
-  cliquez "Supprimer".
+- **Home** — profiles, screen layout, buttons, widgets and encoders
+- **Settings** — device connection, Home Assistant, MQTT and global settings
 
-"Enregistrer et envoyer a l'ecran" sauvegarde et pousse immediatement la
-disposition (boutons affiches + encodeurs) vers l'ecran.
+The Home page is designed to visually match the physical 1024×600 screen.
 
-### Grille redimensionnable (facon "sections" Home Assistant)
+What you see in the browser is intended to closely represent what will be
+displayed on the Stream Deck.
 
-L'ecran est decoupe en une grille **invisible** de cases carrees (9
-colonnes x 4 lignes) : un emplacement peut occuper 1 ou plusieurs cases,
-au lieu d'etre fige a une seule taille comme avant.
+---
 
-- **Deplacer** : glissez-deposez un bouton affiche n'importe ou sur la
-  grille - il se repositionne a la case visee (aimante a la grille).
-  Glissez-le sur la bibliotheque pour le retirer de l'ecran. Glissez un
-  bouton de la bibliotheque sur la grille pour l'y afficher (assigne au
-  premier emplacement physique libre).
-- **Redimensionner** : tirez sur le petit repere en bas a droite d'un
-  emplacement pour l'agrandir/reduire (en cases entieres), comme les
-  widgets petit/moyen/grand d'un iPhone.
-- **Pas de chevauchement** : deux emplacements ne peuvent pas occuper la
-  meme case - un depot ou redimensionnement qui provoquerait un
-  chevauchement est simplement refuse (l'emplacement reste ou il etait).
+## Button library and physical slots
 
-Cote firmware, chaque emplacement est repositionne/redimensionne en direct
-(`firmware/slot_grid.yaml`, un lambda LVGL par emplacement) des que l'appli
-PC pousse sa nouvelle disposition - aucun reflashage necessaire pour
-changer l'agencement de l'ecran.
+The firmware exposes **36 physical slots** arranged on an invisible 9×4 grid.
 
-### Carte meteo (widget dedie, anime)
+The PC application adds an unlimited button library on top of those physical
+slots.
 
-Au plus une par profil, elle partage la meme grille invisible que les 16
-emplacements (glisser-deposer/redimensionner pareil) mais se configure a
-part - cliquez la tuile "Meteo" (dans la maquette ou les emplacements
-masques) pour choisir une entite `weather.*` Home Assistant.
+This means you can store as many configured buttons as you want while displaying
+up to 36 at the same time.
 
-Affiche, empiles verticalement et centres sur la carte : le libelle de
-la condition en haut (ex "Pluie", "Ensoleille"), l'icone au milieu, puis
-une grande temperature en bas (police 34pt) - agencement inspire a la
-fois de `bramkragten/weather-card` (regroupement icone+temperature
-compact plutot qu'ecarte aux extremites) et de `breezy-weather` (gros
-chiffre "hero" sous un libelle de condition court), **animee selon la
-condition** :
+Buttons that are not currently displayed remain available in the library.
 
-| condition Home Assistant | animation |
+You can:
+
+- create buttons
+- edit buttons
+- drag buttons onto the screen
+- move buttons around the grid
+- resize buttons
+- drag buttons back into the library
+- permanently delete buttons
+
+Removing a button from the screen does **not** delete it. It simply returns to
+the library.
+
+Press **Save and send to screen** to save the configuration and immediately push
+the active layout to the device.
+
+---
+
+# Resizable grid
+
+The screen uses an invisible grid made of:
+
+```text
+9 columns × 4 rows
+```
+
+A slot can occupy one or multiple cells.
+
+### Move
+
+Drag a displayed slot to another position.
+
+The slot snaps to the grid.
+
+### Add to screen
+
+Drag a button from the library onto the screen.
+
+The application assigns it to an available physical slot.
+
+### Remove from screen
+
+Drag the button back into the library.
+
+### Resize
+
+Use the resize handle in the bottom-right corner of a slot.
+
+Slots can span multiple rows and columns.
+
+### Collision protection
+
+Two slots cannot occupy the same grid cells.
+
+Moves or resizes that would create an overlap are rejected.
+
+The new geometry is pushed to the firmware dynamically, so changing the layout
+does not require reflashing the device.
+
+---
+
+# Profiles
+
+Each profile has its own:
+
+- grid layout
+- buttons
+- widgets
+- three rotary encoders
+- application trigger
+
+Profiles are displayed as tabs above the screen preview.
+
+A green indicator shows which profile is currently active on the physical
+device.
+
+## Automatic profile switching
+
+A profile can be associated with a Windows process such as:
+
+```text
+obs64.exe
+Discord.exe
+Game.exe
+```
+
+When that application becomes the foreground window, the Stream Deck
+automatically switches to the matching profile.
+
+The active application is checked approximately every 1.5 seconds.
+
+A profile without an application trigger acts as the default fallback profile.
+
+## Creating a profile
+
+When creating a profile, the application can display currently open
+applications.
+
+Selecting one automatically fills the executable/process name instead of
+requiring you to find it manually.
+
+## Manual profile override
+
+A profile can also be forced manually.
+
+Use **Force this profile** to keep it active regardless of the foreground
+application.
+
+Use **Automatic** to restore normal profile switching.
+
+---
+
+# Slot types
+
+A slot can use one of three main types:
+
+| Type | Description |
 |---|---|
-| `sunny` | soleil qui scintille (rayons) |
-| `clear-night` | etoiles qui clignotent |
-| `cloudy`/`partlycloudy`/`fog` | nuages qui derivent |
-| `rainy`/`pouring`/`hail`/`lightning`/`lightning-rainy` | pluie qui tombe |
-| `snowy`/`snowy-rainy` | neige qui tombe (avec une legere derive) |
-| `windy`/`windy-variant`/`exceptional` | icone statique (pas d'animation dediee) |
+| `button` | Executes an action when pressed |
+| `bar` | Displays a 0–100 value from Home Assistant |
+| `text` | Displays a Home Assistant state and unit |
 
-La correspondance condition -> icone/animation est faite cote PC
-(`streamdeck_companion/weather.py`, facile a etendre/corriger sans
-reflasher), le firmware se contente d'afficher/animer selon le style
-recu (`firmware/weather_card.yaml`) - une seule boucle `interval:` (90ms)
-anime les elements (gouttes/flocons/rayons/etoiles/nuages) deja presents
-sur l'ecran, en les deplacant/montrant/cachant selon la condition, sans
-recourir a l'API d'animation LVGL (`lv_anim_t`) dont le comportement exact
-est trop incertain sans pouvoir compiler/tester directement sur le
-materiel.
+Home Assistant-backed widgets are refreshed through the REST API approximately
+every 15 seconds by default.
 
-**Icone** : illustration [amCharts](https://www.amcharts.com/free-animated-svg-weather-icons/)
-(CC-BY 4.0) convertie une fois en PNG (`scripts/convert_weather_icons.py`,
-sources dans `scripts/weather_icons_src/`) et servie par `icon_server.py` -
-les animations SMIL/CSS de ces SVG ne peuvent pas s'executer sur l'ecran
-(LVGL/ESP32 ne rend pas de SVG anime), seule l'illustration statique est
-recuperee, notre propre animation (pluie/neige/rayons ci-dessus) tourne
-autour. `sunny`/`clear-night`/`cloudy`/`partlycloudy`/`fog`/`rainy`/
-`pouring`/`hail`/`lightning`/`lightning-rainy`/`snowy`/`snowy-rainy` ont
-une illustration dediee ; `windy`/`windy-variant`/`exceptional` retombent
-sur un glyphe simple (pas d'illustration adaptee dans ce pack).
+Optional MQTT integration can provide much faster updates.
 
-Necessite une integration meteo configuree dans Home Assistant (ex
-"Meteo-France", "OpenWeatherMap", "Pirate Weather"...) exposant une
-entite `weather.*`.
+---
 
-Les 3 encodeurs de la maquette sont cliquables comme les emplacements :
-leur popup regle l'action de chacun des 3 sens (horaire, antihoraire,
-appui).
+# Actions
 
-### La barre de l'encodeur affiche la vraie valeur
+Supported actions include:
 
-Si le sens horaire et le sens antihoraire d'un encodeur sont symetriques
-(meme cible, sens opposes), sa barre/etiquette affiche automatiquement la
-**vraie valeur pilotee** au lieu d'un simple compteur brut -
-`streamdeck_companion/encoder_sync.py` deduit ce que l'encodeur represente
-a partir de ses deux actions deja configurees, sans champ de config
-supplementaire :
+| Action | Description |
+|---|---|
+| `none` | No action |
+| `keys` | Keyboard shortcut such as `ctrl+shift+s` |
+| `launch` | Launch an application, executable or command |
+| `url` | Open a URL or URI such as `steam://...` |
+| `media` | Play/pause, next, previous, volume and mute |
+| `home_assistant` | Call a Home Assistant service |
+| `audio_output` | Change the default Windows audio output |
+| `app_volume` | Change the volume of a specific Windows application |
+| `app_mute` | Mute/unmute a specific Windows application |
+| `ha_adjust` | Incrementally adjust a Home Assistant entity |
 
-| configuration de l'encodeur (horaire / antihoraire)                          | ce que la barre affiche                  | tourner l'encodeur regle vraiment la valeur ? |
-|--------------------------------------------------------------------------------|-------------------------------------------|-------------------------------------------|
-| `media` `vol_up` / `vol_down`                                                  | volume general Windows                    | oui (touche multimedia)                    |
-| `app_volume` `up:<processus>` / `down:<processus>` (meme processus)           | volume de cette application                | oui                                         |
-| `ha_adjust` `up:<entite>` / `down:<entite>` (meme entite `light`/`media_player`/`fan`/`cover`/`climate`) | valeur reelle de l'entite | oui - ajustement par pas via `ha_client.py::adjust_encoder_entity()`, recommande pour ces domaines |
-| `home_assistant` sur la meme entite (meme domaines)                            | valeur reelle de l'entite                  | seulement si le service configure ajuste bien la valeur (ex `light.toggle` ne fait qu'allumer/eteindre) |
+---
 
-Sans configuration symetrique reconnue, la barre reste neutre (aucune
-valeur brute affichee). La synchronisation est relue toutes les ~2s
-(`encoder_sync.run_forever`) - Windows uniquement pour `media`/`app_volume`
-(pycaw), toutes plateformes pour `ha_adjust`/`home_assistant`.
+# Application library
 
-**Pourquoi `ha_adjust` plutot que `home_assistant` pour fan/cover/climate ?**
-Contrairement au volume (`media_player.volume_up`/`volume_down`, sans
-parametre), la plupart des domaines HA n'ont pas de service "+/-" tout
-fait - regler un volet ou un thermostat necessite d'envoyer une valeur
-(ex `climate.set_temperature` avec un parametre `temperature`), ce que le
-format compact `domaine.service:entite` de `home_assistant` ne permet pas
-(aucune place pour une donnee). `ha_adjust` contourne ca : il lit la valeur
-actuelle de l'entite et calcule lui-meme le nouveau palier (1% pour
-light/media_player/fan/cover, 0.5°C pour climate) a chaque cran.
+When a button uses the `launch` action, the configuration popup provides an
+application browser instead of requiring users to manually type executable
+paths.
 
-## Profils par application
+The library can include:
 
-Au-dessus de la maquette, une barre d'onglets liste vos **profils** - chacun
-une grille de 36 emplacements + 3 encodeurs independante. Un point vert sur
-un onglet indique le profil **reellement affiche sur l'ecran en ce moment**.
+- currently running applications
+- Start Menu applications
+- manually added executables
+- manually added shortcuts
 
-- **Creer un profil** : "+ Nouveau profil" - donnez-lui un nom et un
-  **declencheur** (le nom du processus, ex `obs64.exe`). Un menu deroulant
-  liste directement toutes les applications actuellement ouvertes sur
-  votre PC (comme Alt+Tab) - choisissez la vôtre dedans, le declencheur et
-  un nom de profil suggere se remplissent tout seuls. Pas besoin de
-  connaitre le nom exact du `.exe`, ni de jongler entre cette page et
-  l'application a detecter.
-- **Bascule automatique** : des que l'application du declencheur passe au
-  premier plan, l'ecran change de grille tout seul, sans intervention
-  (`streamdeck_companion/profile_watcher.py`, sonde la fenetre active
-  toutes les ~1.5s). Le profil sans declencheur (typiquement "Defaut")
-  s'affiche quand aucun declencheur ne correspond.
-  Le premier profil dont le declencheur correspond gagne, dans l'ordre
-  de creation - evitez plusieurs profils avec le meme declencheur.
-- **Forcer un profil manuellement** : le bouton "Forcer ce profil" fige
-  l'ecran sur l'onglet actuellement affiche (pratique pour previsualiser un
-  profil qu'on vient d'editer sans attendre que son application prenne le
-  focus) ; "Automatique" a cote reprend la bascule normale.
-- **Modifier/supprimer** un profil : cliquez l'icone crayon sur son onglet.
-  Le profil sans declencheur ne peut pas etre supprime s'il ne reste que lui.
+A search field filters the application list.
 
-Chaque onglet garde ses propres modifications en memoire meme en changeant
-d'onglet - "Enregistrer et envoyer a l'ecran" sauvegarde **tous les profils
-d'un coup**, mais ne pousse vers l'ecran que celui reellement actif (les
-autres sont juste enregistres, prets a s'activer a leur tour).
+Selecting an application automatically fills its launch target and can also
+suggest a button label.
 
-### Reglages (`/reglages`)
+Custom applications are stored in:
 
-Connexion (IP/port/cle API), forme des boutons (carre/rond, s'applique aux
-36 emplacements), Home Assistant (URL + jeton). Des reglages qu'on ne
-touche presque jamais une fois l'ecran configure - a l'ecart de la page
-qu'on utilise au quotidien.
+```text
+dashboard_config.yaml
+```
 
-### Type d'emplacement (`bouton` / `barre` / `texte`)
+Automatic application discovery currently targets Windows.
 
-- **bouton** : declenche une action au clic (voir tableau ci-dessous).
-- **barre** : jauge 0-100, alimentee par l'etat d'une entite Home
-  Assistant numerique (volume, luminosite, batterie...) - choisie dans une
-  liste recherchable (voir "Choisir une entite Home Assistant" ci-dessous),
-  pas besoin de connaitre l'entity_id exact.
-- **texte** : affiche la valeur brute d'une entite HA + son unite (ex
-  "21.5°C") - meme reglage de source.
+On other platforms, applications can still be added manually.
 
-Les widgets (`barre`/`texte`) sont rafraichis toutes les ~15 secondes par
-`streamdeck_companion/ha_poller.py`, qui interroge l'API REST de Home
-Assistant en arriere-plan (pas de websocket, suffisant pour quelques
-entites). Si un broker MQTT est renseigne dans **Reglages**, les mises a
-jour deviennent quasi instantanees - voir "Synchronisation instantanee via
-MQTT" plus bas.
+---
 
-Dans la maquette de l'accueil, une tuile `barre` affiche une petite jauge
-sous le libelle et une tuile `texte` affiche un espace reserve pour la
-valeur ("--") - de quoi voir tout de suite quel type est configure sur
-chaque emplacement. La jauge/valeur affichee dans le navigateur est un
-espace reserve (pas la vraie valeur HA en direct : seul l'ecran physique
-la recoit, via `ha_poller.py`).
+# Real application icons
 
-## Types d'actions (`type` / cible)
+Launch buttons can automatically display the real icon of an application or
+game instead of a generic glyph.
 
-| type              | cible                             | effet                                    |
-|-------------------|------------------------------------|-------------------------------------------|
-| `none`            | -                                  | rien configure                             |
-| `keys`            | ex `ctrl+shift+s`                 | envoie une combinaison clavier             |
-| `launch`          | chemin ou commande (arguments acceptes) | lance une application/un jeu - voir "Choisir une application" ci-dessous, pas besoin de taper le chemin a la main |
-| `url`             | URL ou URI (`steam://...`, `discord://...`) | ouverte via le gestionnaire par defaut du systeme |
-| `media`           | `play_pause`/`next`/`previous`/`vol_up`/`vol_down`/`mute` | touche multimedia |
-| `home_assistant`  | emplacement : entite + service choisis dans la popup (voir "Choisir une entite Home Assistant" ci-dessous) ; encodeurs : format compact `domaine.service:entite`, ex `light.toggle:light.bureau` | appelle un service Home Assistant (bascule une lumiere/prise/scene...) - **sauf** pour un emplacement cible `media_player` : un tap ouvre une popup adaptee au lieu d'appeler le service directement, voir "Popup tactile adaptee" ci-dessous. Les ampoules restent en tap = bascule directe (reglage fin sur l'appui long, voir "Reglage couleur...") |
-| `audio_output`    | emplacement : peripheriques choisis dans la popup (liste recherchable, `streamdeck_companion/audio_devices.py`) - identifiant opaque, pas destine a etre tape a la main | bascule le peripherique de sortie audio par defaut (casque/enceintes...) - Windows uniquement |
-| `app_volume`      | encodeurs : `up:<processus>`/`down:<processus>` (ex `up:chrome.exe`), choisi dans une liste deroulante des applications ayant une session audio active (`streamdeck_companion/app_volume.py`) | regle le volume d'une application precise (et non le volume general) en tournant l'encodeur - Windows uniquement (pycaw) |
-| `app_mute`        | encodeurs : nom du processus (ex `chrome.exe`), meme liste deroulante que `app_volume` | bascule le son de cette application - pratique sur l'appui d'un encodeur dont la rotation est deja en `app_volume` - Windows uniquement (pycaw) |
-| `ha_adjust`       | encodeurs : `up:<entite>`/`down:<entite>` (ex `up:climate.salon`) | ajuste vraiment par pas (1% ou 0.5°C selon le domaine) la luminosite/volume/vitesse/position/temperature d'une entite `light`/`media_player`/`fan`/`cover`/`climate` - utile quand le domaine n'a pas de service HA sans parametre equivalent a `vol_up`/`vol_down` (ex un volet ou un thermostat), voir "La barre de l'encodeur affiche la vraie valeur" plus bas |
+On Windows:
 
-## Bibliotheque d'applications (type d'action `launch`)
+```text
+icon_extract.py
+```
 
-Pour eviter d'avoir a connaitre/taper un chemin (pas accessible au grand
-public), la popup d'un emplacement affiche une vraie bibliotheque
-d'applications - grille avec icones et recherche, comme un logiciel de
-Stream Deck du commerce - des que le type d'action est `launch` :
+extracts icons from `.exe` and `.lnk` files using `icoextract` and Pillow.
 
-- **Applications ouvertes en ce moment** (point vert) : meme source que le
-  declencheur de profil (`profile_watcher.py::list_open_windows()`) - le
-  chemin exact de l'executable est resolu automatiquement, pratique quand
-  l'appli tourne deja et que vous voulez juste pointer dessus sans chercher
-  son raccourci.
-- **Applications detectees** : les raccourcis du menu Demarrer (utilisateur
-  + tous les utilisateurs), listes automatiquement
-  (`streamdeck_companion/app_library.py`).
-- **Barre de recherche** : filtre la grille en tapant les premieres lettres
-  du nom. Une meme application presente dans plusieurs sources n'apparait
-  qu'une fois (priorite a la version "ouverte en ce moment").
-- **Tuile "+ Ajouter..."** : ouvre l'explorateur de fichiers Windows pour
-  choisir un `.exe`/`.lnk` non liste (jeu portable, appli sans raccourci
-  Demarrer) - l'application choisie **rejoint durablement la bibliotheque**
-  (persistee dans `dashboard_config.yaml`, cle `custom_apps`), plus besoin
-  de rechercher son chemin une seconde fois. Un lien "Retirer" sur ces
-  tuiles personnalisees permet de les enlever de la bibliotheque.
+The icons are served to the Stream Deck through:
 
-Cliquer une tuile remplit automatiquement le chemin de lancement et le
-libelle de l'emplacement. Le champ texte en dessous reste modifiable
-directement pour les utilisateurs avances (ex: ajouter des arguments de
-ligne de commande apres avoir choisi une application dans la grille).
+```text
+icon_server.py
+```
 
-Windows uniquement pour la detection automatique (necessite
-`pywin32`/`winshell`, deja dans `requirements.txt` pour cette plateforme).
-Sur les autres systemes, seule la detection automatique est indisponible -
-la tuile "+ Ajouter..." (via un selecteur de fichier natif, `tkinter`) et
-le champ texte libre restent utilisables partout.
+on port:
 
-## Choisir une entite Home Assistant
+```text
+8081
+```
 
-Comme pour les applications, la popup d'un emplacement propose une
-**liste recherchable de vos entites Home Assistant** (`streamdeck_companion/ha_client.py::list_entities()`)
-plutot que de taper un entity_id a la main - inspire de
-[cgiesche/streamdeck-homeassistant](https://github.com/cgiesche/streamdeck-homeassistant) :
+The icon server is intentionally separate from the main dashboard.
 
-- **Source d'un widget** (type `barre`/`texte`) : tapez quelques lettres
-  du nom (ex "temp", "volume", "salon"), cliquez l'entite trouvee - son
-  `entity_id` remplit le champ automatiquement.
-- **Action `home_assistant`** (type `bouton`) : meme recherche, puis un
-  menu deroulant **"Service"** propose les services courants pour le
-  domaine de l'entite choisie (ex `light.*` -> toggle/turn_on/turn_off,
-  `media_player.*` -> play/pause/volume...) - pas besoin de connaitre le
-  nom exact d'un service Home Assistant. Le champ compact
-  `domaine.service:entite` en dessous se remplit tout seul, et reste
-  modifiable directement pour les cas avances.
+The main configuration dashboard remains available only on:
 
-Necessite Home Assistant configure dans **Reglages** (URL + jeton d'acces
-longue duree). Si la connexion echoue, un message clair s'affiche
-(URL injoignable / jeton refuse) au lieu d'une erreur technique brute.
+```text
+127.0.0.1:8080
+```
 
-Les 3 encodeurs ont le meme picker, pour les actions `home_assistant` ET
-`ha_adjust` : cherchez l'entite, choisissez le service si besoin - le sens
-horaire/antihoraire (`up`/`down` pour `ha_adjust`) est deduit automatiquement
-de la direction editee, plus besoin de le deviner/taper a la main. Le champ
-texte compact reste modifiable directement pour les cas avances.
+while the icon server must be reachable by the physical device on the local
+network.
 
-## Indicateur "Hors ligne"
+---
 
-Si une entite liee a un widget `texte` ou a la carte meteo ne repond plus
-(Home Assistant injoignable, entite supprimee/renommee...) pendant au moins
-2 sondages consecutifs (~30s), l'ecran affiche "Hors ligne" a la place de la
-derniere valeur au lieu de rester silencieusement fige dessus - des que la
-lecture reussit a nouveau, la vraie valeur revient immediatement. Un widget
-`barre` (jauge sans texte visible, voir plus bas) reste a sa derniere
-position connue sans indicateur dedie, faute d'un moyen propre de signaler
-"hors ligne" sur une simple barre sans ajouter une nouvelle entite firmware.
+# Rotary encoders
 
-## Synchronisation instantanee via MQTT (facultatif)
+The current hardware configuration contains three rotary encoders.
 
-Par defaut, les widgets `barre`/`texte` et la couleur d'ampoule sont
-rafraichis par sondage REST (`ha_poller.py`, ~15s). Pour une mise a jour
-quasi instantanee, renseignez un broker MQTT dans **Reglages** : l'appli
-demarre alors aussi `streamdeck_companion/ha_mqtt.py`, qui pousse la
-valeur des qu'un message arrive (le sondage REST continue de tourner en
-parallele comme filet de securite - rien a desactiver).
+Each encoder can configure:
 
-Cote **Home Assistant**, il faut publier les changements d'etat sur MQTT
-via l'integration native `mqtt_statestream` (`configuration.yaml`) :
+- clockwise rotation
+- counter-clockwise rotation
+- push action
+
+## Real value synchronization
+
+When clockwise and counter-clockwise actions form a recognized symmetrical
+pair, the encoder display can show the real controlled value instead of a raw
+rotation counter.
+
+Examples include:
+
+| Configuration | Displayed value |
+|---|---|
+| `media` volume up/down | Windows master volume |
+| `app_volume` | Volume of the selected application |
+| `ha_adjust` | Current Home Assistant entity value |
+| compatible `home_assistant` actions | Current Home Assistant entity value |
+
+Supported Home Assistant domains include:
+
+```text
+light
+media_player
+fan
+cover
+climate
+```
+
+For Home Assistant entities, `ha_adjust` is usually preferred when the value
+must actually be incremented or decremented.
+
+For example:
+
+```text
+up:climate.living_room
+down:climate.living_room
+```
+
+The application reads the current value and calculates the next step.
+
+Typical steps are:
+
+```text
+1%   light / media player / fan / cover
+0.5°C climate
+```
+
+Encoder state synchronization runs approximately every 2 seconds.
+
+---
+
+# Home Assistant integration
+
+Home Assistant is optional.
+
+When configured with a Home Assistant URL and long-lived access token, the
+application can:
+
+- read entity states
+- display text widgets
+- display numeric gauges
+- call services
+- control lights
+- control media players
+- control fans
+- control covers
+- control climate entities
+- display weather information
+- synchronize colors and values
+
+The physical Stream Deck also remains available through Home Assistant's native
+ESPHome integration.
+
+---
+
+## Entity picker
+
+Users do not need to manually type most Home Assistant entity IDs.
+
+The configuration popup provides a searchable entity list using:
+
+```text
+ha_client.py::list_entities()
+```
+
+Search examples:
+
+```text
+temperature
+volume
+living room
+```
+
+Selecting an entity automatically fills its `entity_id`.
+
+For `home_assistant` actions, common services for the selected domain are also
+offered.
+
+Advanced users can still edit the compact action representation manually.
+
+---
+
+# Offline state detection
+
+If a Home Assistant entity used by a text widget or weather card fails to
+respond for at least two consecutive polling cycles, the screen displays an
+offline state instead of silently keeping a stale value.
+
+When communication succeeds again, the live value is restored automatically.
+
+Bar widgets currently keep their last known value because their UI does not
+contain a dedicated offline label.
+
+---
+
+# MQTT synchronization
+
+REST polling is the default synchronization method.
+
+Widgets and light colors are normally refreshed approximately every 15 seconds.
+
+For near real-time updates, an MQTT broker can be configured in Settings.
+
+The application then runs:
+
+```text
+streamdeck_companion/ha_mqtt.py
+```
+
+alongside REST polling.
+
+Home Assistant can publish state changes through `mqtt_statestream`:
 
 ```yaml
 mqtt_statestream:
@@ -367,307 +480,360 @@ mqtt_statestream:
   publish_attributes: true
 ```
 
-Le `base_topic` doit correspondre exactement au champ **"Sujet de base"**
-de la page Reglages (meme valeur par defaut : `homeassistant/state`).
-Sans `mqtt_statestream` configure cote HA, le champ "Hote du broker" peut
-rester vide - l'appli fonctionne alors comme avant (sondage REST seul).
+The configured base topic must match the value used in the companion
+application.
 
-**Note** : un changement des reglages MQTT necessite de redemarrer
-l'appli (icone barre des taches) pour etre pris en compte - contrairement
-aux reglages de connexion a l'ecran, la connexion MQTT n'est pas
-re-etablie automatiquement en cours de route.
+REST polling continues running as a fallback even when MQTT is enabled.
 
-## Popup tactile adaptee (lecteurs multimedia)
+Changing MQTT settings currently requires restarting the companion application.
 
-Pour un emplacement `bouton` dont l'action `home_assistant` cible une
-entite du domaine **`media_player`**, un tap sur l'ecran n'appelle plus
-directement le service configure dans la popup - il ouvre a la place un
-**mini-panneau** (inspire des popups de
-[GalusPeres/HomeTiles](https://github.com/GalusPeres/HomeTiles)) :
-interrupteur lecture/pause + boutons precedent/suivant + curseur de
-volume (glissable au doigt).
+---
 
-Les **ampoules** (`light`) restent en tap = bascule directe
-allumer/eteindre, comme n'importe quel autre domaine - leur reglage fin
-(couleur/chaleur/intensite) se fait uniquement via l'**appui long**, voir
-"Reglage couleur..." ci-dessous.
+# Media player popup
 
-Le panneau se preremplit avec l'etat actuel de l'entite (lu via l'API
-REST HA a l'ouverture), se ferme tout seul apres 15s d'inactivite ou via
-le bouton "X", et ne s'affiche jamais en meme temps que le panneau du
-mode couleur (appui long) - voir `streamdeck_companion/ha_popup.py` pour
-la logique cote PC (`firmware/ha_popup.yaml`/`ha_popup_panel.yaml` cote
-firmware). Pour tout autre domaine (`light`, `switch`, `scene`,
-`script`...), le tap continue d'appeler directement le service
-configure, comme avant. **Necessite de reflasher le firmware** (nouvelles
-entites `ha_popup_*` et
-panneau LVGL).
+A button targeting a Home Assistant `media_player` entity opens a dedicated
+touchscreen control panel instead of immediately executing a single service.
 
-## Couleur d'une ampoule sur le bouton
+The popup includes:
 
-Pour un emplacement `bouton` dont l'action `home_assistant` cible une
-entite du domaine `light`, une case **"Afficher la couleur de l'ampoule
-sur le bouton"** apparait sous le choix du service. Une fois cochee :
+- play / pause
+- previous
+- next
+- volume slider
 
-- `ha_poller.py` lit l'etat de l'ampoule a chaque sondage (~15s, meme
-  cycle que les widgets) et pousse une couleur hex vers l'ecran
-  (`streamdeck_companion/ha_client.py::light_color_hex()`).
-- **Ampoule RGB** : sa vraie couleur (`attributes.rgb_color`).
-- **Ampoule "blanc variable"** (temperature de couleur, sans RGB propre) :
-  couleur approximee depuis `color_temp_kelvin`/`color_temp` (algorithme
-  de Tanner Helland - assez fidele pour un indicateur visuel, pas une
-  reproduction exacte).
-- **Ampoule on/off simple** (aucune info de couleur) : un blanc chaud
-  generique tant qu'elle est allumee.
-- **Eteinte** : le bouton revient a sa couleur par defaut.
+The state is loaded from Home Assistant when the popup opens.
 
-Cote firmware, chaque emplacement expose une 5e entite `text` ("Slot N -
-couleur", format `#RRGGBB`) qui met a jour le fond du bouton via
-`lvgl.obj.update` (voir `firmware/slots_*.yaml`) - **necessite de
-reflasher le firmware** pour beneficier de cette fonctionnalite, un
-`git pull` cote appli PC ne suffit pas.
+The popup automatically closes after approximately 15 seconds of inactivity or
+when the close button is pressed.
 
-## Reglage couleur/chaleur/intensite par appui long
+Implementation:
 
-Sur un emplacement `bouton` eligible (meme condition que ci-dessus :
-action `home_assistant` domaine `light` + case "Afficher la couleur..."
-cochee), un **appui long** sur l'ecran ouvre un mode reglage en direct via
-les 3 encodeurs **ou directement au doigt sur l'ecran** :
+```text
+streamdeck_companion/ha_popup.py
+firmware/ha_popup.yaml
+firmware/ha_popup_panel.yaml
+```
 
-- **Encodeur 1** / glissement sur la bande "Teinte" : teinte (hue).
-- **Encodeur 2** / glissement sur la bande "Chaleur" : temperature de couleur.
-- **Encodeur 3** / glissement sur la barre "Intensite" : intensite (luminosite).
+---
 
-Un panneau apparait au centre de l'ecran pendant le reglage : une bande
-arc-en-ciel pour la teinte et une bande chaude/froide pour la temperature
-de couleur, plus une barre pour l'intensite - les 3 avec le **meme rendu**
-(piste pleine largeur arrondie, meme epaisseur) et un curseur qui se
-deplace en direct, que ce soit via un cran d'encodeur ou un **glissement
-tactile direct** sur la bande/barre correspondante (slider LVGL superpose
-a la bande, voir `firmware/color_mode_panel.yaml`). Chaque changement met
-aussi a jour l'apercu couleur sur le bouton immediatement et appelle Home
-Assistant en direct (limite a ~8 appels/s max par axe pour ne pas le
-spammer - voir `color_mode.py::_send_update`/`handle_touch`). Le mode se
-ferme tout seul apres 10s d'inactivite, ou en touchant le bouton "X" qui
-apparait en haut a droite de l'ecran pendant le reglage - les 3 cartes
-encodeurs du bas d'ecran sont masquees pendant ce temps pour ne pas
-melanger leur % normal avec le panneau. LVGL envoie un "click" juste apres
-le "long press" au relachement du doigt : `device_client.py` l'ignore
-(`_pending_hold_slot`) pour eviter que l'appui long declenche AUSSI
-l'action normale du bouton (ex: eteindre/allumer l'ampoule en plus
-d'ouvrir le mode couleur). **Necessite de reflasher le firmware** (nouvel
-evenement `hold_N` par emplacement, panneau + sliders + bouton "X"
-flottant et switch `Mode couleur actif`/entites `number` dans
-`firmware/package.yaml`/`firmware/color_mode_panel.yaml`).
+# Home Assistant light controls
 
-## Ajustement tactile des widgets "barre"
+Buttons targeting `light` entities can optionally display the current light
+color as their background.
 
-Un emplacement de type `barre` avec une source Home Assistant configuree
-(champ "Source Home Assistant") accepte maintenant le tactile directement
-sur l'ecran : toucher la **moitie gauche** diminue la valeur de 5%,
-la **moitie droite** l'augmente - via deux zones tactiles invisibles
-superposees au widget (voir `firmware/slot_widgets.yaml`), actives
-uniquement quand l'emplacement est bien de type `barre`. Domaines pris en
-charge : `light` (luminosite), `media_player` (volume), `fan` (vitesse),
-`cover` (position) - voir `ha_client.py::adjust_entity_percent()`.
-**Necessite de reflasher le firmware.**
+The displayed color can come from:
 
-## Icones
+- actual RGB values
+- color temperature converted to RGB
+- a generic warm-white fallback
 
-Le selecteur d'icone (popup d'un emplacement) propose un catalogue curate
-de 172 glyphes Material Icons (`streamdeck_companion/icons.py`) - meme
-police chargee dans le navigateur et sur l'ecran (`gfonts://Material
-Icons`, embarquee dans `firmware/icon_font.yaml`), donc l'apercu
-correspond a ce qui s'affiche reellement. Une barre de recherche filtre le
-catalogue par nom (ex "volet", "batterie", "wifi"), meme principe que le
-picker d'icones de Home Assistant. Pas d'upload d'image personnalisee
-arbitraire (voir Limitations).
+When the light is off, the button returns to its normal background.
 
-Le catalogue couvre l'eclairage/le confort (volets, rideaux, garage,
-capteurs de porte/fenetre, cheminee, jacuzzi...), le climat et la meteo
-(orage, nuageux, humidite...), l'informatique et les peripheriques
-(ordinateur, clavier, souris, casque, niveaux de batterie, USB, carte SD,
-Bluetooth...), la securite, le multimedia et les taches courantes -
-n'importe quel glyphe Material Icons peut etre ajoute en plus (il faut
-l'ajouter a la fois a `icons.py` et au `glyphs:` de
-`firmware/icon_font.yaml`, sinon il s'affiche comme une case vide sur
-l'ecran).
+Color state is handled through:
 
-### Vraies icones d'appli/jeu
+```text
+ha_client.py::light_color_hex()
+```
 
-Pour un emplacement de type `bouton` avec une action **launch** (lancer
-une appli/jeu), l'ecran affiche desormais automatiquement la **vraie
-icone** de l'executable (Discord, Steam, un jeu precis...) a la place du
-glyphe generique - rien a configurer, ca remplace le glyphe des que la
-cible pointe vers un `.exe`/`.lnk` valide (sinon le glyphe manuel reste
-affiche en repli). Fonctionnement (Windows uniquement) :
+---
 
-- `icon_extract.py` extrait l'icone reelle via `icoextract` (resource
-  icone de l'executable, ou de la cible resolue + `IconLocation` d'un
-  raccourci `.lnk`), l'aplatit sur le fond des boutons avec Pillow (evite
-  de gerer la transparence PNG cote firmware) et met en cache en memoire.
-- `icon_server.py` est un **second serveur HTTP separe**, sur le port
-  8081 et ecoutant sur toutes les interfaces (contrairement au dashboard
-  principal qui reste en 127.0.0.1 uniquement) - il ne sert QUE ces
-  icones deja resolues (rien de sensible), pour que l'ecran (sur le
-  meme reseau local) puisse les telecharger sans exposer le reste de la
-  configuration (raccourcis, jeton Home Assistant...) sur le reseau.
-- Cote firmware, chaque emplacement a une entite `online_image` dediee
-  (`firmware/slot_icons.yaml`) declenchee via `online_image.set_url`
-  quand `Slot N - icone` recoit une valeur `REAL:<version>` plutot qu'un
-  glyphe (voir `firmware/slots_*.yaml`) - `device_client.py` pousse aussi
-  l'URL locale de l'appli PC (`PC - URL locale`) a chaque connexion.
+## Long-press light control
 
-**Necessite de reflasher le firmware** (nouveau composant `http_request:`,
-16 entites `online_image`, widgets image par emplacement). C'est la partie
-la plus consequente ajoutee a ce firmware a ce jour (nouveau composant
-jamais utilise auparavant dans ce projet) - n'ayant pas pu compiler ce
-firmware depuis ce sandbox (pas d'installation ESPHome ici), la config a
-ete verifiee ligne a ligne contre le schema reel du composant (cle par
-cle, valeurs d'enum, methodes C++ disponibles) mais un premier
-`esphome run` pourrait remonter une erreur de configuration a corriger -
-contrairement a un crash materiel, ce serait detecte et affiche
-**avant** le flash, sans risque pour l'appareil.
+Long-pressing an eligible light button opens a dedicated control mode.
 
-## Integration Home Assistant
+The three encoders become:
 
-Comme l'ecran expose ses entites nativement (integration ESPHome), Home
-Assistant les voit et peut declencher ses propres automatisations en
-parallele de cette appli (aucune configuration necessaire cote HA pour ca).
+```text
+Encoder 1 → Hue
+Encoder 2 → Color temperature
+Encoder 3 → Brightness
+```
 
-En renseignant l'URL et un jeton d'acces longue duree dans la page de
-configuration, vous debloquez en plus :
-- les emplacements type **barre**/**texte** (etat en direct d'une entite HA)
-- le type d'action **home_assistant** (un bouton qui appelle un service HA)
+The same controls can also be manipulated directly on the touchscreen.
 
-Independamment, si vous voulez que Home Assistant puisse demander une
-action a ce PC (ex: depuis une automation HA sans rapport avec le Stream
-Deck), activez `receiver.token` dans `dashboard_config.yaml` et utilisez
-`home-assistant/rest_command.yaml.snippet` + les exemples dans
-`home-assistant/example_automations.yaml`. Rien de tout ceci n'est
-necessaire pour que les emplacements/encodeurs du Stream Deck fonctionnent
-- c'est un bonus.
+The panel contains:
 
-## Limitations connues
+- hue strip
+- color-temperature strip
+- brightness slider
 
-- **Batterie des peripheriques (Corsair iCUE)** : etudiee, pas implementee.
-  Le SDK officiel iCUE (`cuesdk` sur PyPI) n'expose PAS le niveau de
-  batterie - limitation confirmee, demandee de longue date par la
-  communaute Corsair sans reponse officielle. Seul contournement connu :
-  lire la valeur directement dans la memoire du processus iCUE en cours
-  d'execution (comme un projet communautaire trouve en recherche), ce qui
-  necessite de scanner cette memoire SUR LA MACHINE CIBLE (ex. via Cheat
-  Engine) pour trouver l'adresse exacte - specifique a la version d'iCUE
-  et aux peripheriques branches, et casse a chaque mise a jour d'iCUE. Pas
-  d'implementation fiable possible sans acces a une machine reelle pour
-  determiner cette adresse au prealable.
-- Les combinaisons clavier et touches multimedia passent par le module
-  `keyboard`, qui necessite les droits administrateur/root sur certaines
-  plateformes (et ne fonctionne pas sous Wayland).
-- Sur macOS, `keyboard` n'emule pas les touches multimedia : seul le volume
-  systeme est gere nativement (`osascript`). Pour play/pause/next sur macOS,
-  il faudra integrer un outil tiers (ex. `nowplaying-cli`) dans
-  `streamdeck_companion/actions.py::_media_macos`.
-- `tray.py` n'a pu etre teste que hors environnement graphique Windows reel
-  (logique de connexion/config verifiee en detail ; le rendu de l'icone
-  lui-meme necessite un vrai bureau Windows pour etre confirme).
-- Le changement de sortie audio (`audio_devices.py`, interface COM non
-  documentee `IPolicyConfig::SetDefaultEndpoint`) est **confirme fonctionnel**
-  sur une vraie machine Windows.
-- Le mode reglage couleur (appui long, panneau avec bandes teinte/chaleur/
-  intensite) et l'ajustement tactile des widgets "barre" sont **confirmes
-  fonctionnels sur l'appareil reel** (les 3 encodeurs, y compris 2 et 3
-  dont les appuis parasites initiaux ont ete corriges par le filtre de
-  debounce `delayed_on_off: 25ms`).
-- Un changement d'IP/port/cle API est repris automatiquement au prochain
-  essai de reconnexion (jusqu'a ~10s, `device_client.py::connect()` relit
-  la config a chaque tentative) - pas besoin de redemarrer l'icone de la
-  barre des taches.
-- Les vraies icones d'appli/jeu (`icon_extract.py`/`icon_server.py`,
-  composant firmware `online_image`) n'ont pas pu etre testees sur
-  l'appareil reel depuis ce sandbox (ni compilation ESPHome, ni Windows
-  pour `icoextract`/l'extraction d'icone) - schema/logique verifies contre
-  la source du composant, mais c'est la partie la plus consequente
-  ajoutee a ce firmware, a tester avec attention au premier reflash. Le
-  serveur d'icones (`icon_server.py`, port 8081) ecoute sur toutes les
-  interfaces reseau (necessaire pour que l'ecran le joigne) - separe du
-  dashboard principal (127.0.0.1 uniquement) pour ne rien exposer d'autre.
-- Le bouton "media" (`play_pause` etc.) envoie une touche multimedia - il
-  n'affiche pas l'etat de lecture reel (recuperer l'etat "en cours de
-  lecture" de facon fiable et multi-plateforme demanderait une integration
-  bien plus lourde). Pour un vrai indicateur en direct, utilisez un
-  emplacement type `texte`/`barre` avec une source Home Assistant (ex un
-  media_player HA) a la place.
-- La grille (9x4 cases) est une limite fixe : impossible d'avoir plus de
-  4 lignes de cases ou un emplacement plus large que 9 cases - largement
-  au-dela de ce qu'un ecran de cette taille peut afficher lisiblement, mais
-  a garder en tete si vous changez CELL/GAP/PITCH/COLS dans
-  `scripts/gen_slot_grid.py` (a resynchroniser avec
-  `package.yaml::action_grid` et `profiles.py::GRID_COLS/GRID_ROWS`).
-- Pas d'upload d'icone personnalisee : le catalogue est un jeu curate de
-  glyphes Material Icons (`streamdeck_companion/icons.py`, 172 icones).
-  Pour en ajouter, il faut aussi ajouter le point de code correspondant au
-  `glyphs:` de `font_icons` dans `firmware/icon_font.yaml`, sinon il
-  s'affiche comme une case vide sur l'ecran.
-- Les widgets Home Assistant (`barre`/`texte`) sont sondes par polling
-  REST toutes les ~15s (`ha_poller.py`), pas en temps reel instantane par
-  defaut - meme cadence pour la couleur d'une ampoule liee a un bouton
-  (jusqu'a ~15s de decalage). Voir "Synchronisation instantanee via MQTT"
-  plus haut pour une mise a jour quasi instantanee (necessite de
-  configurer `mqtt_statestream` cote Home Assistant).
-- L'approximation de couleur pour les ampoules "blanc variable" (sans
-  RGB propre, juste une temperature de couleur) est une conversion
-  standard temperature -> RGB (Tanner Helland), pas une calibration
-  fidele a un modele d'ampoule precis - suffisant comme indicateur visuel.
-- La couleur de bouton necessite de **reflasher le firmware** (nouvelle
-  entite `Slot N - couleur` par emplacement, voir `firmware/slots_*.yaml`)
-  en plus de mettre a jour l'appli PC.
-- Le picker d'entites Home Assistant charge **toutes** les entites de
-  l'installation (`GET /api/states`, pas de filtre par domaine cote
-  serveur) - fonctionne bien jusqu'a quelques centaines d'entites, la
-  recherche est limitee aux 50 premiers resultats affiches par requete.
-  Testee avec des donnees simulees (pas de vraie instance Home Assistant
-  accessible depuis le sandbox de developpement) - a confirmer sur votre
-  installation reelle.
-- Les services proposes par domaine dans le picker d'action
-  `home_assistant` sont une liste courante curatee
-  (`ha_client.py::COMMON_SERVICES`), pas une introspection complete de
-  l'API Home Assistant - pour un service plus specifique/rare, tapez
-  directement le format compact `domaine.service:entite` dans le champ en
-  dessous.
-- La detection automatique (`app_library.py`) ne liste que les raccourcis
-  du menu Demarrer (utilisateur + tous les utilisateurs) - les applications
-  sans raccourci Demarrer (portables, certaines apps du Microsoft Store)
-  n'y apparaissent pas ; ajoutez-les via la tuile "+ Ajouter...". Detection
-  Windows uniquement (le reste de la bibliotheque - ajout manuel, recherche,
-  applications personnalisees - fonctionne partout). Logique testee avec
-  des donnees simulees dans le sandbox de developpement (qui n'a pas acces
-  a `pywin32`/`winshell`), pas encore confirmee de bout en bout sur une
-  vraie machine Windows.
-- Les icones de la bibliotheque d'applications sont un glyphe generique
-  (pas l'icone reelle extraite du `.exe`) - extraire une vraie miniature
-  par application demanderait une integration plus lourde
-  (`win32gui.ExtractIconEx`), envisageable dans un futur chantier.
-- La page de configuration a ete testee de bout en bout avec un navigateur
-  headless (rendu de la maquette d'ecran et des masques, popup emplacement
-  et popup encodeur, glisser-deposer dans les deux sens et entre les deux,
-  bibliotheque d'applications - recherche, selection, ajout/retrait
-  personnalise -, picker d'entites Home Assistant - recherche, selection,
-  choix de service -, creation/edition/suppression de profils, sauvegarde,
-  persistance apres rechargement) mais pas visuellement sur l'ecran
-  physique - verifiez apres un push que les icones/couleurs/tailles vous
-  conviennent et signalez tout ce qui parait cassé (ex une icone qui
-  s'affiche comme une case vide).
-- La bascule automatique de profil (`profile_watcher.py`) est Windows
-  uniquement (necessite `pywin32`+`psutil` pour identifier la fenetre au
-  premier plan) - sur les autres systemes, seule la bascule manuelle
-  ("Forcer ce profil"/"Automatique") est disponible. Non verifiee sur une
-  vraie machine Windows (logique de correspondance testee unitairement
-  dans le sandbox de developpement, qui n'a pas de fenetre/bureau reel).
-- La correspondance d'un declencheur se fait par **nom de processus exact**
-  (ex `obs64.exe`), pas par titre de fenetre ni par plusieurs criteres -
-  simple et previsible, mais deux applications qui partagent le meme nom de
-  processus ne peuvent pas avoir de profils distincts.
-- Le sondage de la fenetre active a lieu toutes les ~1.5s : la bascule
-  automatique n'est donc pas instantanee (delai perceptible mais bref en
-  changeant d'application).
+Changes update the preview and Home Assistant in real time.
+
+The update rate is limited to avoid unnecessarily flooding Home Assistant.
+
+The mode closes:
+
+- automatically after inactivity
+- through the close button
+
+Implementation:
+
+```text
+streamdeck_companion/color_mode.py
+firmware/color_mode_panel.yaml
+```
+
+---
+
+# Touch-adjustable bar widgets
+
+A `bar` widget linked to a supported Home Assistant entity can be adjusted
+directly from the touchscreen.
+
+Touch:
+
+```text
+left half  → decrease by 5%
+right half → increase by 5%
+```
+
+Supported domains currently include:
+
+```text
+light
+media_player
+fan
+cover
+```
+
+Implementation:
+
+```text
+ha_client.py::adjust_entity_percent()
+```
+
+---
+
+# Weather card
+
+Each profile can contain one dedicated weather card.
+
+It uses a Home Assistant:
+
+```text
+weather.*
+```
+
+entity.
+
+The card displays:
+
+- weather condition
+- weather icon
+- temperature
+- condition-specific animation
+
+Current animation behavior:
+
+| Condition | Animation |
+|---|---|
+| `sunny` | animated sun rays |
+| `clear-night` | blinking stars |
+| `cloudy`, `partlycloudy`, `fog` | moving clouds |
+| `rainy`, `pouring`, `hail`, `lightning`, `lightning-rainy` | falling rain |
+| `snowy`, `snowy-rainy` | falling snow |
+| `windy`, `windy-variant`, `exceptional` | static fallback |
+
+Condition mapping is handled by:
+
+```text
+streamdeck_companion/weather.py
+```
+
+Firmware animation is implemented in:
+
+```text
+firmware/weather_card.yaml
+```
+
+Weather artwork is based on the
+[amCharts animated weather icons](https://www.amcharts.com/free-animated-svg-weather-icons/)
+licensed under CC BY 4.0.
+
+The SVG sources and their license are preserved in:
+
+```text
+scripts/weather_icons_src/
+```
+
+---
+
+# Icon catalog
+
+The built-in icon picker currently contains approximately 172 Material Icons
+glyphs.
+
+The same font is used in the browser preview and on the physical device so the
+preview closely matches the final result.
+
+Relevant files:
+
+```text
+streamdeck_companion/icons.py
+firmware/icon_font.yaml
+```
+
+When adding a new glyph to `icons.py`, it must also be included in the
+`glyphs:` list in `firmware/icon_font.yaml`.
+
+Otherwise the physical screen may display an empty square.
+
+---
+
+# Home Assistant → PC actions
+
+Home Assistant can optionally ask the companion application to execute an
+action on the PC.
+
+Enable a receiver token in:
+
+```text
+dashboard_config.yaml
+```
+
+and use:
+
+```text
+home-assistant/rest_command.yaml.snippet
+```
+
+Examples are available in:
+
+```text
+home-assistant/example_automations.yaml
+```
+
+This feature is optional and is not required for normal Stream Deck operation.
+
+---
+
+# Plugins
+
+The application contains a V2 plugin architecture.
+
+Plugins can contribute:
+
+- actions
+- action executors
+- widgets
+- state providers
+- events
+- settings
+- assets
+
+See:
+
+```text
+../docs/PLUGIN_SDK.md
+```
+
+Reference plugins are available under:
+
+```text
+streamdeck_companion/example_plugins/
+```
+
+---
+
+# Development
+
+Install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Run the complete test suite:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Run Ruff:
+
+```bash
+ruff check streamdeck_companion
+```
+
+Run MyPy on the Core:
+
+```bash
+mypy streamdeck_companion/core
+```
+
+The GitHub Actions workflow runs:
+
+- Python 3.11
+- Python 3.12
+- Ruff
+- MyPy
+- complete regression tests
+- Core coverage checks
+
+---
+
+# Known limitations
+
+The project is still under active development.
+
+Important current limitations include:
+
+- several PC integrations are Windows-specific
+- automatic foreground-application profile switching currently targets Windows
+- `keyboard` may require elevated permissions on some platforms
+- the `keyboard` library does not work under Wayland
+- macOS multimedia-key support is incomplete
+- automatic application discovery currently targets the Windows Start Menu
+- application audio control depends on Windows / `pycaw`
+- the 9×4 physical grid is currently fixed
+- custom arbitrary image uploads are not currently supported
+- Home Assistant REST polling defaults to approximately 15-second intervals
+- MQTT requires Home Assistant `mqtt_statestream` configuration
+- some firmware features still need broader real-hardware testing
+- application icon extraction currently targets Windows
+- profile triggers match exact process names
+- automatic profile switching is not instantaneous because the foreground
+  application is polled periodically
+
+Some functionality has been validated on real hardware, while other parts have
+primarily been validated through automated tests or simulated environments.
+
+Hardware test reports and bug reports are very welcome.
+
+---
+
+# Security
+
+Never commit:
+
+- `dashboard_config.yaml`
+- Wi-Fi credentials
+- ESPHome API keys
+- OTA passwords
+- Home Assistant access tokens
+- MQTT credentials
+- private paths or personal configuration
+
+The dashboard itself listens only on:
+
+```text
+127.0.0.1:8080
+```
+
+The separate icon server listens on the local network because the ESP32 needs
+to retrieve application icons.
+
+It only serves resolved icon assets and does not expose the main configuration
+dashboard.
+
+---
+
+# Related documentation
+
+- [Main README](../README.md)
+- [Architecture](../docs/ARCHITECTURE.md)
+- [Wiring](../docs/WIRING.md)
+- [Plugin SDK](../docs/PLUGIN_SDK.md)
+- [Contributing](../CONTRIBUTING.md)
+
+Contributions and technical feedback are welcome.
