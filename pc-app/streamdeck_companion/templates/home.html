@@ -1,13 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-  <p class="sub">Aperçu fidele de l'ecran. Cliquez un bouton ou un encodeur pour le configurer. Glissez-deposez un bouton pour le deplacer sur l'ecran (tirez son coin bas-droit pour l'agrandir - deux boutons ne peuvent pas se chevaucher), ou vers "Vos boutons" en dessous pour le retirer de l'ecran sans le supprimer. Creez-en autant que vous voulez : seuls ceux affiches sur l'ecran (36 maximum, la place disponible) sont utilisables sur l'appareil.</p>
+  <p class="sub">
+    Accurate preview of the physical screen. Click a button or encoder to configure it.
+    Drag and drop a button to move it on the screen, use the bottom-right handle to resize it,
+    or drag it to "Your buttons" below to remove it from the screen without deleting it.
+    Create as many buttons as you want: up to 36 can be displayed on the device at the same time.
+  </p>
 
   <div class="profile-bar">
     <div id="profile-tabs" class="profile-tabs"></div>
     <div class="profile-status">
       <span id="profile-status-text" class="hint"></span>
-      <button type="button" id="profile-force-btn" class="secondary">Forcer ce profil</button>
-      <button type="button" id="profile-auto-btn" class="secondary">Automatique</button>
+      <button type="button" id="profile-force-btn" class="secondary">Force this profile</button>
+      <button type="button" id="profile-auto-btn" class="secondary">Automatic</button>
     </div>
   </div>
 
@@ -17,220 +22,402 @@
         <span class="screen-title">STREAM DECK</span>
         <span class="screen-dot"></span>
       </div>
+
       <div class="screen-grid-wrap">
         <div id="slot-grid" class="screen-grid"></div>
       </div>
+
       <div id="encoder-mock" class="screen-encoders"></div>
-      <div class="screen-status">PC hors ligne</div>
+
+      <div class="screen-status">PC offline</div>
     </div>
 
     <div class="hidden-tray-section">
-      <h2>Vos boutons</h2>
-      <p class="hint">Boutons enregistres mais pas affiches sur l'ecran en ce moment. Cliquez pour les modifier, glissez-les sur l'ecran ci-dessus pour les y afficher. "+" pour en creer un nouveau.</p>
+      <h2>Your buttons</h2>
+      <p class="hint">
+        Saved buttons that are not currently displayed on the screen.
+        Click one to edit it, or drag it onto the screen above to display it.
+        Use "+" to create a new button.
+      </p>
+
       <div id="hidden-tray" class="hidden-tray"></div>
     </div>
 
     <input type="hidden" name="profiles_json" id="profiles_json">
-    <button type="submit" id="save-button">Enregistrer et envoyer a l'ecran</button>
+
+    <button type="submit" id="save-button">
+      Save and send to screen
+    </button>
   </form>
 
   <div id="slot-modal" class="modal-backdrop hidden">
     <div class="modal">
-      <h2 id="modal-title">Bouton</h2>
+      <h2 id="modal-title">Button</h2>
 
-      <label>Libelle</label>
+      <label>Label</label>
       <input type="text" id="modal-label" maxlength="24">
 
       <label>Type</label>
       <select id="modal-type">
-        {% for t in slot_types %}<option value="{{ t }}">{{ slot_type_labels.get(t, t) }}</option>{% endfor %}
+        {% for t in slot_types %}
+          <option value="{{ t }}">{{ slot_type_labels.get(t, t) }}</option>
+        {% endfor %}
       </select>
 
-      <label>Icone</label>
-      <input type="text" id="icon-search" placeholder="Rechercher une icone (ex: volet, batterie, wifi)...">
+      <label>Icon</label>
+      <input
+        type="text"
+        id="icon-search"
+        placeholder="Search for an icon (e.g. cover, battery, Wi-Fi)...">
+
       <div id="icon-picker" class="icon-picker"></div>
 
       <div id="modal-action-fields">
-        <label>Action (au clic)</label>
+        <label>Action (on press)</label>
+
         <select id="modal-action-type">
-          {% for t in action_types %}<option value="{{ t }}">{{ action_type_labels.get(t, t) }}</option>{% endfor %}
+          {% for t in action_types %}
+            <option value="{{ t }}">{{ action_type_labels.get(t, t) }}</option>
+          {% endfor %}
         </select>
+
         <div id="modal-app-library">
-          <input type="text" id="modal-app-search" placeholder="Rechercher une application...">
+          <input
+            type="text"
+            id="modal-app-search"
+            placeholder="Search for an application...">
+
           <div id="modal-app-grid" class="app-grid"></div>
+
           <p id="modal-app-status" class="hint"></p>
         </div>
+
         <div id="modal-ha-action-fields">
-          <label>Entite Home Assistant</label>
-          <input type="text" id="modal-ha-action-search" placeholder="Rechercher une entite...">
+          <label>Home Assistant entity</label>
+
+          <input
+            type="text"
+            id="modal-ha-action-search"
+            placeholder="Search for an entity...">
+
           <div id="modal-ha-action-list" class="entity-list"></div>
+
           <p id="modal-ha-action-status" class="hint"></p>
+
           <label>Service</label>
           <select id="modal-ha-action-service"></select>
+
           <div id="modal-ha-color-row">
-            <label for="modal-show-light-color">Afficher la couleur de l'ampoule sur le bouton</label>
+            <label for="modal-show-light-color">
+              Display the light color on the button
+            </label>
+
             <input type="checkbox" id="modal-show-light-color">
           </div>
         </div>
+
         <div id="modal-audio-fields">
-          <label>Peripherique de sortie audio</label>
-          <input type="text" id="modal-audio-search" placeholder="Rechercher un peripherique...">
+          <label>Audio output device</label>
+
+          <input
+            type="text"
+            id="modal-audio-search"
+            placeholder="Search for an audio device...">
+
           <div id="modal-audio-list" class="entity-list"></div>
+
           <p id="modal-audio-status" class="hint"></p>
         </div>
-        <input type="text" id="modal-action-target"
-               placeholder="ctrl+shift+s / https://... / vol_up / light.toggle:light.bureau">
+
+        <input
+          type="text"
+          id="modal-action-target"
+          placeholder="ctrl+shift+s / https://... / vol_up / light.toggle:light.office">
       </div>
 
       <div id="modal-source-fields">
-        <label>Source Home Assistant (entity_id)</label>
-        <input type="text" id="modal-ha-entity-search" placeholder="Rechercher une entite...">
+        <label>Home Assistant source (entity_id)</label>
+
+        <input
+          type="text"
+          id="modal-ha-entity-search"
+          placeholder="Search for an entity...">
+
         <div id="modal-ha-entity-list" class="entity-list"></div>
+
         <p id="modal-ha-entity-status" class="hint"></p>
-        <input type="text" id="modal-ha-entity" placeholder="sensor.volume_pc / sensor.temperature_salon">
-        <p class="hint">Rafraichie toutes les ~15s. "barre" attend une valeur numerique 0-100.</p>
+
+        <input
+          type="text"
+          id="modal-ha-entity"
+          placeholder="sensor.pc_volume / sensor.living_room_temperature">
+
+        <p class="hint">
+          Refreshed approximately every 15 seconds.
+          A "bar" expects a numeric value between 0 and 100.
+        </p>
       </div>
 
       <div class="modal-buttons">
-        <button type="button" id="modal-cancel" class="secondary">Annuler</button>
-        <button type="button" id="modal-delete" class="danger">Supprimer</button>
-        <button type="button" id="modal-apply">Appliquer</button>
+        <button type="button" id="modal-cancel" class="secondary">Cancel</button>
+        <button type="button" id="modal-delete" class="danger">Delete</button>
+        <button type="button" id="modal-apply">Apply</button>
       </div>
     </div>
   </div>
 
   <div id="encoder-modal" class="modal-backdrop hidden">
     <div class="modal">
-      <h2 id="encoder-modal-title">Encodeur</h2>
+      <h2 id="encoder-modal-title">Encoder</h2>
 
       <div id="encoder-simple-block">
-        <label style="margin-top:0">Cette molette controle...</label>
+        <label style="margin-top:0">This encoder controls...</label>
+
         <select id="encoder-simple-kind">
-          <option value="none">Rien</option>
-          <option value="ha_adjust">Une lumiere / un appareil Home Assistant</option>
-          <option value="app_volume">Le volume d'une application</option>
-          <option value="media">Le volume general du PC</option>
-          <option value="custom">Personnalise (reglages avances)</option>
+          <option value="none">Nothing</option>
+          <option value="ha_adjust">A Home Assistant light / device</option>
+          <option value="app_volume">Application volume</option>
+          <option value="media">PC master volume</option>
+          <option value="custom">Custom (advanced settings)</option>
         </select>
 
         <div id="encoder-simple-ha-fields" style="display:none">
-          <input type="text" id="encoder-simple-ha-search" placeholder="Rechercher une entite...">
+          <input
+            type="text"
+            id="encoder-simple-ha-search"
+            placeholder="Search for an entity...">
+
           <div id="encoder-simple-ha-list" class="entity-list"></div>
+
           <p id="encoder-simple-ha-status" class="hint"></p>
         </div>
 
         <select id="encoder-simple-app" class="encoder-app-picker" style="display:none">
-          <option value="">Choisir une application...</option>
+          <option value="">Choose an application...</option>
         </select>
 
         <div id="encoder-simple-mute-row" style="display:none">
-          <label><input type="checkbox" id="encoder-simple-mute"> Couper le son avec l'appui</label>
+          <label>
+            <input type="checkbox" id="encoder-simple-mute">
+            Mute on press
+          </label>
         </div>
 
         <p id="encoder-simple-hint" class="hint" style="display:none">
-          Sens horaire = augmente, sens antihoraire = diminue - la barre de l'encodeur affiche la vraie valeur.
+          Clockwise increases the value, counter-clockwise decreases it.
+          The encoder bar displays the real controlled value.
         </p>
       </div>
 
       <div id="encoder-advanced-block" style="display:none">
-        {% for direction, dlabel in [("clockwise", "Sens horaire"), ("anticlockwise", "Sens antihoraire"), ("press", "Appui")] %}
+        {% for direction, dlabel in [
+          ("clockwise", "Clockwise"),
+          ("anticlockwise", "Counter-clockwise"),
+          ("press", "Press")
+        ] %}
         <div class="encoder-block">
           <label style="margin-top:0">{{ dlabel }}</label>
+
           <div class="encoder-row">
             <select id="encoder-modal-{{ direction }}-type">
-              {% for t in encoder_action_types %}<option value="{{ t }}">{{ action_type_labels.get(t, t) }}</option>{% endfor %}
+              {% for t in encoder_action_types %}
+                <option value="{{ t }}">{{ action_type_labels.get(t, t) }}</option>
+              {% endfor %}
             </select>
-            <input type="text" id="encoder-modal-{{ direction }}-target"
-                   placeholder="vol_up / ctrl+z / light.toggle:light.bureau / up:chrome.exe / up:light.bureau">
+
+            <input
+              type="text"
+              id="encoder-modal-{{ direction }}-target"
+              placeholder="vol_up / ctrl+z / light.toggle:light.office / up:chrome.exe / up:light.office">
           </div>
-          <select id="encoder-modal-{{ direction }}-app" class="encoder-app-picker" style="display:none">
-            <option value="">Choisir une application...</option>
+
+          <select
+            id="encoder-modal-{{ direction }}-app"
+            class="encoder-app-picker"
+            style="display:none">
+            <option value="">Choose an application...</option>
           </select>
-          <div id="encoder-modal-{{ direction }}-ha-fields" class="encoder-ha-fields" style="display:none">
-            <input type="text" id="encoder-modal-{{ direction }}-ha-search" placeholder="Rechercher une entite...">
-            <div id="encoder-modal-{{ direction }}-ha-list" class="entity-list"></div>
-            <p id="encoder-modal-{{ direction }}-ha-status" class="hint"></p>
-            <select id="encoder-modal-{{ direction }}-ha-service" style="display:none"></select>
+
+          <div
+            id="encoder-modal-{{ direction }}-ha-fields"
+            class="encoder-ha-fields"
+            style="display:none">
+
+            <input
+              type="text"
+              id="encoder-modal-{{ direction }}-ha-search"
+              placeholder="Search for an entity...">
+
+            <div
+              id="encoder-modal-{{ direction }}-ha-list"
+              class="entity-list">
+            </div>
+
+            <p
+              id="encoder-modal-{{ direction }}-ha-status"
+              class="hint">
+            </p>
+
+            <select
+              id="encoder-modal-{{ direction }}-ha-service"
+              style="display:none">
+            </select>
           </div>
         </div>
         {% endfor %}
+
         <p class="hint">
-          <b>Raccourci clavier</b> (ex "ctrl+shift+s") &middot; <b>Lancer une application</b> (chemin/commande) &middot;
-          <b>Ouvrir un site web</b> (URL/URI) &middot;
-          <b>Musique / volume du PC</b> (play_pause/next/previous/vol_up/vol_down/mute) &middot;
-          <b>Action Home Assistant</b> (choisissez l'entite puis le service dans la liste ci-dessus, appel direct
-          pour un service sans parametre) &middot;
-          <b>Ajuster un appareil Home Assistant</b> (choisissez l'entite dans la liste, le sens horaire/antihoraire
-          est applique automatiquement) : ajuste vraiment par pas la luminosite/volume/vitesse/position/temperature
-          d'une entite <code>light</code>/<code>media_player</code>/<code>fan</code>/<code>cover</code>/<code>climate</code>,
-          pratique quand aucun service HA sans parametre n'existe (ex un volet ou un thermostat) &middot;
-          <b>Volume/Couper le son d'une application</b> (choisissez l'application dans la liste, meme principe).
-          Pour un encodeur "volume" (general ou par appli) ou lie a une entite HA (luminosite/volume/vitesse/
-          position/temperature), la barre affiche automatiquement la vraie valeur des que sens horaire et
-          antihoraire ciblent la meme chose en sens opposes.
+          <b>Keyboard shortcut</b> (e.g. "ctrl+shift+s") &middot;
+          <b>Launch application</b> (path or command) &middot;
+          <b>Open website</b> (URL or URI) &middot;
+          <b>PC media / volume</b>
+          (play_pause / next / previous / vol_up / vol_down / mute) &middot;
+          <b>Home Assistant action</b>
+          (choose an entity and service from the list above) &middot;
+          <b>Adjust Home Assistant device</b>
+          (choose an entity and the clockwise/counter-clockwise direction
+          will automatically increase or decrease its value) &middot;
+          <b>Application volume / mute</b>
+          (choose the application from the list).
+
+          For volume encoders or encoders linked to compatible Home Assistant
+          entities, the bar automatically displays the real value when
+          clockwise and counter-clockwise actions target the same source in
+          opposite directions.
         </p>
       </div>
 
       <div class="modal-buttons">
-        <button type="button" id="encoder-modal-cancel" class="secondary">Annuler</button>
-        <button type="button" id="encoder-modal-apply">Appliquer</button>
+        <button
+          type="button"
+          id="encoder-modal-cancel"
+          class="secondary">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          id="encoder-modal-apply">
+          Apply
+        </button>
       </div>
     </div>
   </div>
 
   <div id="weather-modal" class="modal-backdrop hidden">
     <div class="modal">
-      <h2>Carte meteo</h2>
-      <label>Visible sur l'ecran</label>
+      <h2>Weather card</h2>
+
+      <label>Visible on screen</label>
       <input type="checkbox" id="weather-modal-visible">
 
-      <label>Entite meteo Home Assistant</label>
-      <input type="text" id="weather-modal-search" placeholder="Rechercher une entite meteo...">
+      <label>Home Assistant weather entity</label>
+
+      <input
+        type="text"
+        id="weather-modal-search"
+        placeholder="Search for a weather entity...">
+
       <div id="weather-modal-list" class="entity-list"></div>
+
       <p id="weather-modal-status" class="hint"></p>
-      <input type="text" id="weather-modal-entity" placeholder="weather.maison" readonly>
+
+      <input
+        type="text"
+        id="weather-modal-entity"
+        placeholder="weather.home"
+        readonly>
+
       <p class="hint">
-        Affiche une icone selon la condition (soleil/pluie/neige/nuage/nuit...),
-        animee sur l'ecran, plus la temperature. Necessite une integration
-        meteo configuree dans Home Assistant (ex "Meteo-France", "OpenWeatherMap").
+        Displays an icon based on the current condition
+        (sun, rain, snow, clouds, night, etc.), animated on the screen,
+        together with the temperature.
+
+        Requires a weather integration configured in Home Assistant,
+        such as OpenWeatherMap, Pirate Weather or another provider exposing
+        a <code>weather.*</code> entity.
       </p>
 
       <div class="modal-buttons">
-        <button type="button" id="weather-modal-cancel" class="secondary">Annuler</button>
-        <button type="button" id="weather-modal-apply">Appliquer</button>
+        <button
+          type="button"
+          id="weather-modal-cancel"
+          class="secondary">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          id="weather-modal-apply">
+          Apply
+        </button>
       </div>
     </div>
   </div>
 
   <div id="profile-modal" class="modal-backdrop hidden">
     <div class="modal">
-      <h2 id="profile-modal-title">Nouveau profil</h2>
-      <label>Nom du profil</label>
-      <input type="text" id="profile-modal-name" maxlength="24" placeholder="OBS, Discord, Jeu...">
+      <h2 id="profile-modal-title">New profile</h2>
 
-      <label>Choisir parmi les applications ouvertes</label>
+      <label>Profile name</label>
+
+      <input
+        type="text"
+        id="profile-modal-name"
+        maxlength="24"
+        placeholder="OBS, Discord, Gaming...">
+
+      <label>Choose from currently open applications</label>
+
       <select id="profile-modal-open-windows">
-        <option value="">— Chargement des applications ouvertes... —</option>
+        <option value="">— Loading open applications... —</option>
       </select>
-      <p id="profile-modal-open-windows-status" class="hint"></p>
 
-      <label>Declencheur (nom du processus)</label>
-      <input type="text" id="profile-modal-trigger" placeholder="ex: obs64.exe">
+      <p
+        id="profile-modal-open-windows-status"
+        class="hint">
+      </p>
+
+      <label>Trigger (process name)</label>
+
+      <input
+        type="text"
+        id="profile-modal-trigger"
+        placeholder="e.g. obs64.exe">
+
       <p class="hint">
-        L'ecran basculera automatiquement sur ce profil des que cette
-        application passera au premier plan sur le PC. Laissez vide pour
-        un profil utilise par defaut (quand aucun declencheur ne correspond) -
-        un seul profil sans declencheur est necessaire.
+        The Stream Deck will automatically switch to this profile when the
+        application becomes the foreground window.
+
+        Leave this field empty for the default profile used when no other
+        trigger matches. Only one fallback profile is required.
       </p>
 
       <div class="modal-buttons">
-        <button type="button" id="profile-modal-cancel" class="secondary">Annuler</button>
-        <button type="button" id="profile-modal-delete" class="danger">Supprimer</button>
-        <button type="button" id="profile-modal-save">Enregistrer</button>
+        <button
+          type="button"
+          id="profile-modal-cancel"
+          class="secondary">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          id="profile-modal-delete"
+          class="danger">
+          Delete
+        </button>
+
+        <button
+          type="button"
+          id="profile-modal-save">
+          Save
+        </button>
       </div>
     </div>
   </div>
 {% endblock %}
+
 {% block scripts %}
 <script>
   const INITIAL_PROFILES = {{ profiles | tojson }};
@@ -240,6 +427,7 @@
   const ICON_CHOICES = {{ icon_choices | tojson }};
   const SHAPE = {{ shape | tojson }};
 </script>
+
 <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 <script src="{{ url_for('static', filename='app-library.js') }}"></script>
 <script src="{{ url_for('static', filename='ha-entities.js') }}"></script>
