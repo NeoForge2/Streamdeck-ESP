@@ -1,0 +1,35 @@
+# Canal minimal d'acquittement du protocole V2.
+#
+# Le PC continue d'appliquer les commandes via les entites ESPHome existantes
+# (slots, profils, pages, etc.). Une fois l'operation locale terminee, il
+# ecrit le message_id dans "Protocole V2 - requete". Le P4 republie le meme
+# identifiant dans "Protocole V2 - acquittement", ce qui fournit un vrai
+# aller-retour device -> PC sans introduire de parseur JSON ni casser le
+# transport historique.
+
+text:
+  - platform: template
+    id: protocol_v2_request_text
+    name: "Protocole V2 - requete"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 64
+    entity_category: diagnostic
+    on_value:
+      - if:
+          condition:
+            lambda: 'return !x.empty();'
+          then:
+            - text.set:
+                id: protocol_v2_ack_text
+                value: !lambda 'return x;'
+
+  - platform: template
+    id: protocol_v2_ack_text
+    name: "Protocole V2 - acquittement"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 64
+    entity_category: diagnostic

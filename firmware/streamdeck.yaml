@@ -1,0 +1,46 @@
+# Fichier a utiliser si vous flashez directement depuis un PC avec la CLI
+# ESPHome (`esphome run streamdeck.yaml`), en ayant clone tout le depot.
+#
+# Si vous passez par l'add-on ESPHome Builder de Home Assistant, utilisez
+# plutot `ha-device.yaml.example` (qui recupere package.yaml directement
+# depuis GitHub, sans avoir besoin du reste du depot en local).
+
+substitutions:
+  name: "streamdeck"
+  friendly_name: "Stream Deck"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  # Board explicite (plutot que variant + engineering_sample) car cette
+  # carte est un exemplaire d'ingenierie pre-serie (revision de silicium
+  # v1.3, confirmee via "Chip type: ESP32-P4 (revision v1.3)" dans le log
+  # esptool). "variant: esp32p4" + "engineering_sample: true" ne suffisait
+  # pas ici (le board resolu restait esp32-p4_r3-evboard, la board de
+  # production rev3, probablement a cause de l'ordre de fusion avec
+  # esp32: de package.yaml) et provoquait un illegal instruction des le
+  # tout premier instant du demarrage (ROM). Board explicite = fiable.
+  board: esp32-p4-evboard
+
+logger:
+
+wifi:
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+  fast_connect: true
+
+# API native chiffree - utilisee par Home Assistant ET par pc-app/
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+packages:
+  hardware_and_ui: !include package.yaml
+  protocol_v2: !include protocol_v2.yaml

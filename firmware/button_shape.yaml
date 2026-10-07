@@ -1,0 +1,61 @@
+# Forme des boutons - modifiable a chaud (carre ou rond) depuis Home
+# Assistant ou l'appli PC. radius 12 = coins arrondis, radius 999 = LVGL
+# plafonne au max -> cercle. S'applique a tous les emplacements physiques
+# (inoffensif sur les widgets, qui n'utilisent que le style de coin du
+# conteneur) ET a la carte meteo (weather_card_btn, voir
+# firmware/slot_widgets.yaml/gen_weather_card.py).
+#
+# Genere par scripts/gen_button_shape.py, ne pas editer a la main.
+select:
+  - platform: template
+    id: button_shape
+    name: "Forme des boutons"
+    optimistic: true
+    options: ["carre", "rond"]
+    initial_option: "carre"
+    on_value:
+      - lambda: |-
+          int r = (x == "rond") ? 999 : 12;
+          lv_obj_set_style_radius(id(weather_card_btn), r, 0);
+          for (int i = 1; i <= 36; i++) {
+            lv_obj_t *btn = nullptr;
+            switch (i) {
+              case 1: btn = id(slot1_btn); break;
+              case 2: btn = id(slot2_btn); break;
+              case 3: btn = id(slot3_btn); break;
+              case 4: btn = id(slot4_btn); break;
+              case 5: btn = id(slot5_btn); break;
+              case 6: btn = id(slot6_btn); break;
+              case 7: btn = id(slot7_btn); break;
+              case 8: btn = id(slot8_btn); break;
+              case 9: btn = id(slot9_btn); break;
+              case 10: btn = id(slot10_btn); break;
+              case 11: btn = id(slot11_btn); break;
+              case 12: btn = id(slot12_btn); break;
+              case 13: btn = id(slot13_btn); break;
+              case 14: btn = id(slot14_btn); break;
+              case 15: btn = id(slot15_btn); break;
+              case 16: btn = id(slot16_btn); break;
+              case 17: btn = id(slot17_btn); break;
+              case 18: btn = id(slot18_btn); break;
+              case 19: btn = id(slot19_btn); break;
+              case 20: btn = id(slot20_btn); break;
+              case 21: btn = id(slot21_btn); break;
+              case 22: btn = id(slot22_btn); break;
+              case 23: btn = id(slot23_btn); break;
+              case 24: btn = id(slot24_btn); break;
+              case 25: btn = id(slot25_btn); break;
+              case 26: btn = id(slot26_btn); break;
+              case 27: btn = id(slot27_btn); break;
+              case 28: btn = id(slot28_btn); break;
+              case 29: btn = id(slot29_btn); break;
+              case 30: btn = id(slot30_btn); break;
+              case 31: btn = id(slot31_btn); break;
+              case 32: btn = id(slot32_btn); break;
+              case 33: btn = id(slot33_btn); break;
+              case 34: btn = id(slot34_btn); break;
+              case 35: btn = id(slot35_btn); break;
+              case 36: btn = id(slot36_btn); break;
+            }
+            lv_obj_set_style_radius(btn, r, 0);
+          }

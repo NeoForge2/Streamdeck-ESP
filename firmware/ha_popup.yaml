@@ -1,0 +1,51 @@
+# Entites de la popup tactile adaptee (tap sur un emplacement lie a un
+# lecteur multimedia, voir ha_popup_panel.yaml et
+# pc-app/streamdeck_companion/ha_popup.py) - meme esprit que le mode
+# couleur (color_mode_*_number/switch dans package.yaml) : entites
+# optimistes, source de verite partagee entre le PC (etat pousse a
+# l'ouverture) et l'ecran (bascule/glissement tactile). Les ampoules
+# restent en tap = bascule directe (voir device_client.py), pas de popup.
+switch:
+  - platform: template
+    id: ha_popup_active_switch
+    name: "Popup HA actif"
+    optimistic: true
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_obj_clear_flag(id(ha_popup_close_btn), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(ha_popup_panel), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(encoder_cards_row), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(ha_popup_close_btn), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(ha_popup_panel), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(encoder_cards_row), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: ha_popup_power_switch
+    name: "Popup HA - power"
+    optimistic: true
+    on_state: [{lvgl.switch.update: {id: ha_popup_power_lvgl, state: {checked: !lambda "return x;"}}}]
+
+number:
+  - platform: template
+    id: ha_popup_value_number
+    name: "Popup HA - valeur"
+    optimistic: true
+    min_value: 0
+    max_value: 100
+    step: 1
+    initial_value: 0
+    on_value:
+      - lvgl.label.update: {id: ha_popup_value_lbl, text: !lambda "return to_string((int) x) + \"%\";"}
+      - lvgl.slider.update: {id: ha_popup_value_slider, value: !lambda "return (int) x;"}
+
+text:
+  - platform: template
+    id: ha_popup_title_text
+    name: "Popup HA - titre"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 32
+    on_value: [{lvgl.label.update: {id: ha_popup_title_lbl, text: !lambda "return x;"}}]

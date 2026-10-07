@@ -1,0 +1,113 @@
+# Cartes des 3 encodeurs (icone, titre, barre 0-100, valeur %).
+# Genere/extrait de package.yaml pour rester sous 500 lignes.
+- obj:
+    id: encoder1_card
+    width: 300
+    height: 66
+    bg_color: 0x0F2942
+    border_color: 0x1A3A52
+    border_width: 1
+    radius: 12
+    pad_all: 8
+    widgets:
+      - label:
+          id: enc1_icon
+          text: ""
+          text_font: font_icons
+          text_color: 0x00B4D8
+          align: top_left
+          y: -2
+      - label:
+          text: "ENCODEUR 1"
+          text_font: font_mono
+          text_color: 0x8FAFC7
+          align: top_left
+          x: 26
+      - label:
+          id: lbl_encoder1
+          text: "0%"
+          text_font: font_mono
+          text_color: 0x00B4D8
+          align: bottom_right
+      - bar:
+          id: bar_encoder1
+          width: 200
+          height: 10
+          align: bottom_left
+          min_value: 0
+          max_value: 100
+          value: 0
+- obj:
+    id: encoder2_card
+    width: 300
+    height: 66
+    bg_color: 0x0F2942
+    border_color: 0x1A3A52
+    border_width: 1
+    radius: 12
+    pad_all: 8
+    widgets:
+      - label:
+          id: enc2_icon
+          text: ""
+          text_font: font_icons
+          text_color: 0x00B4D8
+          align: top_left
+          y: -2
+      - label:
+          text: "ENCODEUR 2"
+          text_font: font_mono
+          text_color: 0x8FAFC7
+          align: top_left
+          x: 26
+      - label:
+          id: lbl_encoder2
+          text: "0%"
+          text_font: font_mono
+          text_color: 0x00B4D8
+          align: bottom_right
+      - bar:
+          id: bar_encoder2
+          width: 200
+          height: 10
+          align: bottom_left
+          min_value: 0
+          max_value: 100
+          value: 0
+- obj:
+    id: encoder3_card
+    width: 300
+    height: 66
+    bg_color: 0x0F2942
+    border_color: 0x1A3A52
+    border_width: 1
+    radius: 12
+    pad_all: 8
+    widgets:
+      - label:
+          id: enc3_icon
+          text: ""
+          text_font: font_icons
+          text_color: 0x00B4D8
+          align: top_left
+          y: -2
+      - label:
+          text: "ENCODEUR 3"
+          text_font: font_mono
+          text_color: 0x8FAFC7
+          align: top_left
+          x: 26
+      - label:
+          id: lbl_encoder3
+          text: "0%"
+          text_font: font_mono
+          text_color: 0x00B4D8
+          align: bottom_right
+      - bar:
+          id: bar_encoder3
+          width: 200
+          height: 10
+          align: bottom_left
+          min_value: 0
+          max_value: 100
+          value: 0

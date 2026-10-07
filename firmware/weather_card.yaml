@@ -1,0 +1,201 @@
+# Carte meteo (widget dedie, distinct des emplacements generiques -
+# voir docs/ARCHITECTURE.md) : icone + temperature, animee selon la
+# condition (pluie qui tombe, neige, soleil qui scintille, nuages qui
+# derivent, etoiles la nuit). Un seul exemplaire par profil - le bouton
+# lui-meme (weather_card_btn) est dans slot_widgets.yaml (voir
+# scripts/gen_weather_card.py pour le pourquoi), CE fichier ne contient que
+# les entites/la logique d'animation qui le pilotent.
+#
+# L'appli PC (weather.py) traduit l'entite weather.* de Home Assistant en
+# 4 valeurs poussees ici : "Meteo - icone" (illustration amCharts ou glyphe
+# de repli), "Meteo - animation" (style : soleil/nuit/nuage/pluie/neige/
+# aucune), "Meteo - temperature" (texte forme) et "Meteo - condition"
+# (libelle en clair, ex "Ensoleille" - facon breezy-weather, dont l'en-tete
+# affiche la condition en texte au-dessus d'un gros numero, plutot que
+# bramkragten/weather-card qui n'en montre pas). Le firmware ne connait PAS
+# Home Assistant - il se
+# contente d'afficher/animer selon le style recu, comme les emplacements
+# recoivent deja leur glyphe tout fait plutot que de choisir eux-memes.
+#
+# Animation : PAS de lv_anim_t (API dont la disponibilite/signature exacte
+# depend trop precisement de la version LVGL packagee par ESPHome pour
+# etre fiable sans pouvoir compiler/tester) - un seul `interval:` (90ms)
+# deplace/montre/cache les objets pre-declares via des appels bruts deja
+# eprouves ailleurs dans ce firmware (lv_obj_set_x/y, lv_obj_set_style_bg_opa,
+# add_flag/clear_flag LV_OBJ_FLAG_HIDDEN - memes primitives que
+# slot_grid.yaml/button_shape). Position/taille de la carte : meme
+# mecanisme que slot_grid.yaml (une entite texte compacte + lambda),
+# CELL/GAP/PITCH doivent rester coherents avec scripts/gen_slot_grid.py.
+#
+# Genere par scripts/gen_weather_card.py, ne pas editer a la main.
+
+globals:
+  - id: weather_tick
+    type: int
+    restore_value: false
+    initial_value: '0'
+  - id: weather_style
+    type: std::string
+    restore_value: false
+    initial_value: '"aucune"'
+  - id: weather_w
+    type: int
+    restore_value: false
+    initial_value: '204'
+  - id: weather_h
+    type: int
+    restore_value: false
+    initial_value: '204'
+
+switch:
+  - platform: template
+    id: weather_visible_switch
+    name: "Meteo - visible"
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - lvgl.widget.update: {id: weather_card_btn, hidden: false}
+    on_turn_off:
+      - lvgl.widget.update: {id: weather_card_btn, hidden: true}
+
+# Illustration meteo amCharts pre-convertie (voir weather.py,
+# scripts/convert_weather_icons.py, icon_server.py) - meme mecanisme que
+# slot_icons.yaml (online_image + rappel lvgl.image.update une fois les
+# pixels reellement prets), pas de version/hash dans l'URL contrairement
+# aux icones d'appli : le jeu d'icones meteo est fixe, seule la CLE (donc
+# l'URL) change d'une condition a l'autre, ce qui suffit a declencher un
+# nouveau telechargement.
+online_image:
+  - {id: weather_icon_img, url: "http://0.0.0.0/x.png", format: PNG, type: RGB565, byte_order: LITTLE_ENDIAN, resize: 56x56, buffer_size: 12288, update_interval: never, http_request_id: http_client, on_download_finished: [{lvgl.image.update: {id: weather_icon_widget, src: weather_icon_img}}, {lambda: "lv_obj_invalidate(id(weather_icon_widget));"}]}
+
+text:
+  - platform: template
+    id: weather_grid_text
+    name: "Meteo - grille"
+    mode: text
+    optimistic: true
+    initial_value: "0,0,2,2"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(weather_card_btn), px, py);
+          lv_obj_set_size(id(weather_card_btn), pw, ph);
+          id(weather_w) = pw;
+          id(weather_h) = ph;
+  - platform: template
+    id: weather_icon_text
+    name: "Meteo - icone"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 12
+    on_value: [{if: {condition: {lambda: 'return x.rfind("REAL:", 0) == 0;'}, then: [{lambda: "lv_obj_add_flag(id(weather_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_clear_flag(id(weather_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {online_image.set_url: {id: weather_icon_img, url: !lambda 'return id(pc_base_url_text).state + "/weather-icon/" + x.substr(5) + ".png";'}}], else: [{lambda: "lv_obj_clear_flag(id(weather_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_add_flag(id(weather_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {lvgl.label.update: {id: weather_icon_lbl, text: !lambda "return x;"}}]}}]
+  - platform: template
+    id: weather_temperature_text
+    name: "Meteo - temperature"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 16
+    on_value:
+      - lvgl.label.update: {id: weather_temp_lbl, text: !lambda "return x;"}
+  - platform: template
+    id: weather_condition_text
+    name: "Meteo - condition"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 20
+    on_value:
+      - lvgl.label.update: {id: weather_condition_lbl, text: !lambda "return x;"}
+  - platform: template
+    id: weather_animation_text
+    name: "Meteo - animation"
+    mode: text
+    optimistic: true
+    initial_value: "aucune"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          id(weather_style) = x;
+
+interval:
+  - interval: 90ms
+    then:
+      - lambda: |-
+          id(weather_tick) += 1;
+          int t = id(weather_tick);
+          std::string style = id(weather_style);
+          int w = id(weather_w);
+          int h = id(weather_h);
+          bool show_rain = (style == "pluie");
+          bool show_snow = (style == "neige");
+          bool show_cloud = (style == "nuage");
+          bool show_star = (style == "nuit");
+          bool show_sun = (style == "soleil");
+
+          lv_obj_t *rain[5] = {id(weather_rain1), id(weather_rain2), id(weather_rain3), id(weather_rain4), id(weather_rain5)};
+          for (int i = 0; i < 5; i++) {
+            if (show_rain) lv_obj_clear_flag(rain[i], LV_OBJ_FLAG_HIDDEN); else lv_obj_add_flag(rain[i], LV_OBJ_FLAG_HIDDEN);
+            if (show_rain) {
+              int span = h + 20;
+              int y = ((t * 4 + i * (span / 3)) % span) - 20;
+              int x = (i * w) / 5;
+              lv_obj_set_pos(rain[i], x, y);
+            }
+          }
+
+          lv_obj_t *snow[5] = {id(weather_snow1), id(weather_snow2), id(weather_snow3), id(weather_snow4), id(weather_snow5)};
+          for (int i = 0; i < 5; i++) {
+            if (show_snow) lv_obj_clear_flag(snow[i], LV_OBJ_FLAG_HIDDEN); else lv_obj_add_flag(snow[i], LV_OBJ_FLAG_HIDDEN);
+            if (show_snow) {
+              int span = h + 20;
+              int y = ((t * 2 + i * (span / 3)) % span) - 20;
+              int drift = ((t + i * 30) % 40) - 20;
+              int x = (i * w) / 5 + drift / 4;
+              lv_obj_set_pos(snow[i], x, y);
+            }
+          }
+
+          lv_obj_t *cloud[2] = {id(weather_cloud1), id(weather_cloud2)};
+          for (int i = 0; i < 2; i++) {
+            if (show_cloud) lv_obj_clear_flag(cloud[i], LV_OBJ_FLAG_HIDDEN); else lv_obj_add_flag(cloud[i], LV_OBJ_FLAG_HIDDEN);
+            if (show_cloud) {
+              int span = w + 60;
+              int x = ((t + i * (span / 2)) % span) - 50;
+              int y = 15 + i * 20;
+              lv_obj_set_pos(cloud[i], x, y);
+            }
+          }
+
+          lv_obj_t *star[3] = {id(weather_star1), id(weather_star2), id(weather_star3)};
+          const int star_x[3] = {15, w - 20, w / 2};
+          const int star_y[3] = {15, 25, h - 25};
+          for (int i = 0; i < 3; i++) {
+            if (show_star) lv_obj_clear_flag(star[i], LV_OBJ_FLAG_HIDDEN); else lv_obj_add_flag(star[i], LV_OBJ_FLAG_HIDDEN);
+            if (show_star) {
+              lv_obj_set_pos(star[i], star_x[i], star_y[i]);
+              int phase = (t * 3 + i * 40) % 120;
+              int opa = phase < 60 ? phase * 4 : (120 - phase) * 4;
+              lv_obj_set_style_bg_opa(star[i], opa, 0);
+            }
+          }
+
+          lv_obj_t *ray[5] = {id(weather_ray1), id(weather_ray2), id(weather_ray3), id(weather_ray4), id(weather_ray5)};
+          const int ray_dx[5] = {0, 21, 13, -13, -21};
+          const int ray_dy[5] = {-24, -9, 16, 16, -9};
+          for (int i = 0; i < 5; i++) {
+            if (show_sun) lv_obj_clear_flag(ray[i], LV_OBJ_FLAG_HIDDEN); else lv_obj_add_flag(ray[i], LV_OBJ_FLAG_HIDDEN);
+            if (show_sun) {
+              lv_obj_set_pos(ray[i], w / 2 + ray_dx[i], h / 2 - 2 + ray_dy[i]);
+              int phase = (t * 3 + i * 30) % 150;
+              int opa = phase < 75 ? 80 + phase * 2 : 80 + (150 - phase) * 2;
+              lv_obj_set_style_bg_opa(ray[i], opa, 0);
+            }
+          }

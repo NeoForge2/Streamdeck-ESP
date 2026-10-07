@@ -1,0 +1,59 @@
+﻿# A coller dans l'add-on "ESPHome Builder" de Home Assistant (bouton
+# "Editer" sur votre appareil, vue editeur de code), a la place du contenu
+# existant. Contrairement a streamdeck.yaml (usage CLI), ce fichier
+# recupere firmware/package.yaml directement depuis GitHub a chaque
+# compilation : vous n'avez rien d'autre a coller ni a mettre a jour a la
+# main, il suffit de cliquer "Installer"/"Mettre a jour" dans HA.
+#
+# Adaptez les valeurs ci-dessous a votre reseau, puis gardez ce fichier tel
+# quel pour les prochaines mises a jour (je pousse mes changements sur
+# GitHub, vous n'avez qu'a recompiler).
+
+substitutions:
+  name: "stream-deck"
+  friendly_name: "Stream Deck"
+  room: "Bureau"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  # Board explicite (plutot que variant + engineering_sample, qui peut
+  # se resoudre au mauvais board rev3 selon l'ordre de fusion avec
+  # esp32: de package.yaml) - necessaire pour un exemplaire d'ingenierie
+  # pre-serie (revision de silicium < v3.0), c'etait votre cas :
+  board: esp32-p4-evboard
+
+logger:
+
+wifi:
+  ssid: "REMPLACER_PAR_VOTRE_SSID"
+  password: "REMPLACER_PAR_VOTRE_MOT_DE_PASSE_WIFI"
+
+# Generez une cle avec (terminal HA, add-on "Terminal & SSH", ou sur votre PC) :
+#   python3 -c "import secrets, base64; print(base64.b64encode(secrets.token_bytes(32)).decode())"
+api:
+  encryption:
+    key: "REMPLACER_PAR_UNE_CLE_BASE64_32_OCTETS"
+
+ota:
+  - platform: esphome
+    password: "REMPLACER_PAR_UN_MOT_DE_PASSE_OTA"
+
+# Recupere le hardware/UI et le canal d'acquittement V2 depuis GitHub a
+# chaque compilation. `ref:` pointe la branche de dev actuelle - a changer
+# pour "main" une fois le travail merge si vous voulez suivre la branche
+# stable a la place.
+packages:
+  hardware_and_ui:
+    url: https://github.com/NeoForge2/Streamdeck-ESP
+    file: firmware/package.yaml
+    ref: chatgpt/p0-core-foundation
+    refresh: 0s
+  protocol_v2:
+    url: https://github.com/NeoForge2/Streamdeck-ESP
+    file: firmware/protocol_v2.yaml
+    ref: chatgpt/p0-core-foundation
+    refresh: 0s
+

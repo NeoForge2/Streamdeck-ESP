@@ -1,0 +1,124 @@
+name: PC App Core Tests
+
+on:
+  push:
+    paths:
+      - "firmware/protocol_v2.yaml"
+      - "firmware/streamdeck.yaml"
+      - "firmware/ha-device.yaml.example"
+      - "pc-app/streamdeck_companion/**"
+      - "pc-app/tests/**"
+      - "pc-app/requirements*.txt"
+      - "pc-app/pyproject.toml"
+      - ".github/workflows/pc-app-core-tests.yml"
+  pull_request:
+    paths:
+      - "firmware/protocol_v2.yaml"
+      - "firmware/streamdeck.yaml"
+      - "firmware/ha-device.yaml.example"
+      - "pc-app/streamdeck_companion/**"
+      - "pc-app/tests/**"
+      - "pc-app/requirements*.txt"
+      - "pc-app/pyproject.toml"
+      - ".github/workflows/pc-app-core-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  core-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Core quality tooling
+        working-directory: pc-app
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Lint V2 Core and adapters
+        working-directory: pc-app
+        run: >-
+          ruff check
+          streamdeck_companion/core
+          streamdeck_companion/device_events.py
+          streamdeck_companion/device_event_runtime.py
+          streamdeck_companion/device_protocol.py
+          streamdeck_companion/esphome_device_port.py
+          streamdeck_companion/esphome_port_runtime.py
+          streamdeck_companion/esphome_slot_projection.py
+          streamdeck_companion/protocol_retry_runtime.py
+          streamdeck_companion/navigation_legacy.py
+          streamdeck_companion/state_adapters.py
+          streamdeck_companion/runtime_state.py
+          streamdeck_companion/state_protocol_bridge.py
+          streamdeck_companion/runtime_action_catalog.py
+          streamdeck_companion/dashboard_v2_catalog.py
+          streamdeck_companion/dashboard_action_choices.py
+          streamdeck_companion/dashboard_v2_api.py
+          streamdeck_companion/dashboard_v2_routes.py
+          streamdeck_companion/virtual_device.py
+          streamdeck_companion/v2_device_client.py
+
+      - name: Type-check V2 Core and independent adapters
+        working-directory: pc-app
+        run: >-
+          mypy
+          streamdeck_companion/core
+          streamdeck_companion/device_events.py
+          streamdeck_companion/device_event_runtime.py
+          streamdeck_companion/device_protocol.py
+          streamdeck_companion/esphome_device_port.py
+          streamdeck_companion/esphome_port_runtime.py
+          streamdeck_companion/esphome_slot_projection.py
+          streamdeck_companion/protocol_retry_runtime.py
+          streamdeck_companion/navigation_legacy.py
+          streamdeck_companion/state_adapters.py
+          streamdeck_companion/runtime_state.py
+          streamdeck_companion/state_protocol_bridge.py
+          streamdeck_companion/runtime_action_catalog.py
+          streamdeck_companion/dashboard_v2_catalog.py
+          streamdeck_companion/dashboard_action_choices.py
+          streamdeck_companion/dashboard_v2_api.py
+          streamdeck_companion/dashboard_v2_routes.py
+          streamdeck_companion/virtual_device.py
+
+      - name: Type-check V2 DeviceClient wrapper boundary
+        working-directory: pc-app
+        run: mypy --follow-imports=skip streamdeck_companion/v2_device_client.py
+
+      - name: Compile complete companion package
+        working-directory: pc-app
+        run: python -m compileall -q streamdeck_companion
+
+      - name: Run complete regression suite
+        working-directory: pc-app
+        run: python -m unittest discover -s tests -v
+
+      - name: Measure Core coverage
+        if: matrix.python-version == '3.12'
+        working-directory: pc-app
+        run: |
+          coverage run --source=streamdeck_companion/core -m unittest discover -s tests
+          coverage report --show-missing --fail-under=90
+
+  firmware-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate firmware protocol contract files
+        run: |
+          test -s firmware/protocol_v2.yaml
+          test -s firmware/streamdeck.yaml
+          test -s firmware/ha-device.yaml.example
+          grep -q "protocol_v2" firmware/streamdeck.yaml

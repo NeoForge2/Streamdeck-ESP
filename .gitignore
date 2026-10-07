@@ -1,0 +1,27 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets / environment
+secrets.yaml
+.env
+.env.*
+!.env.example
+
+# Local application configuration
+pc-app/config.yaml
+pc-app/dashboard_config.yaml
+pc-app/receiver_config.yaml
+
+# Editors / IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Runtime / local data
+.swarm/

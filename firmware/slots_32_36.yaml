@@ -1,0 +1,403 @@
+# Entites des emplacements 32 a 36 (voir docs/ARCHITECTURE.md pour le
+# systeme de 36 emplacements physiques configurables). Genere par
+# scripts/gen_slot_entities.py, ne pas editer a la main.
+text:
+  - platform: template
+    id: slot32_label
+    name: "Slot 32 - libelle"
+    mode: text
+    optimistic: true
+    initial_value: "Slot 32"
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot32_title, text: !lambda "return x;" }
+  - platform: template
+    id: slot32_value
+    name: "Slot 32 - valeur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot32_value_lbl, text: !lambda "return x;" }
+      - lambda: |-
+          char *endptr;
+          long v = strtol(x.c_str(), &endptr, 10);
+          if (endptr != x.c_str()) {
+            if (v < 0) v = 0;
+            if (v > 100) v = 100;
+            lv_bar_set_value(id(slot32_bar), (int) v, LV_ANIM_OFF);
+          }
+  - platform: template
+    id: slot32_icon
+    name: "Slot 32 - icone"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 20
+    on_value: [{if: {condition: {lambda: 'return x.rfind("REAL:", 0) == 0;'}, then: [{lambda: "lv_obj_add_flag(id(slot32_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_clear_flag(id(slot32_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {online_image.set_url: {id: slot32_icon_img, url: !lambda 'return id(pc_base_url_text).state + "/slot-icon/32.png?v=" + x.substr(5);'}}], else: [{lambda: "lv_obj_clear_flag(id(slot32_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_add_flag(id(slot32_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {lvgl.label.update: {id: slot32_icon_lbl, text: !lambda "return x;"}}]}}]
+  - platform: template
+    id: slot32_color
+    name: "Slot 32 - couleur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 7
+    on_value:
+      - lvgl.obj.update: {id: slot32_btn, bg_color: !lambda 'return x.length() == 7 ? Color(strtoul(x.substr(1,2).c_str(), nullptr, 16), strtoul(x.substr(3,2).c_str(), nullptr, 16), strtoul(x.substr(5,2).c_str(), nullptr, 16)) : Color(0x0F, 0x29, 0x42);'}
+  - platform: template
+    id: slot33_label
+    name: "Slot 33 - libelle"
+    mode: text
+    optimistic: true
+    initial_value: "Slot 33"
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot33_title, text: !lambda "return x;" }
+  - platform: template
+    id: slot33_value
+    name: "Slot 33 - valeur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot33_value_lbl, text: !lambda "return x;" }
+      - lambda: |-
+          char *endptr;
+          long v = strtol(x.c_str(), &endptr, 10);
+          if (endptr != x.c_str()) {
+            if (v < 0) v = 0;
+            if (v > 100) v = 100;
+            lv_bar_set_value(id(slot33_bar), (int) v, LV_ANIM_OFF);
+          }
+  - platform: template
+    id: slot33_icon
+    name: "Slot 33 - icone"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 20
+    on_value: [{if: {condition: {lambda: 'return x.rfind("REAL:", 0) == 0;'}, then: [{lambda: "lv_obj_add_flag(id(slot33_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_clear_flag(id(slot33_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {online_image.set_url: {id: slot33_icon_img, url: !lambda 'return id(pc_base_url_text).state + "/slot-icon/33.png?v=" + x.substr(5);'}}], else: [{lambda: "lv_obj_clear_flag(id(slot33_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_add_flag(id(slot33_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {lvgl.label.update: {id: slot33_icon_lbl, text: !lambda "return x;"}}]}}]
+  - platform: template
+    id: slot33_color
+    name: "Slot 33 - couleur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 7
+    on_value:
+      - lvgl.obj.update: {id: slot33_btn, bg_color: !lambda 'return x.length() == 7 ? Color(strtoul(x.substr(1,2).c_str(), nullptr, 16), strtoul(x.substr(3,2).c_str(), nullptr, 16), strtoul(x.substr(5,2).c_str(), nullptr, 16)) : Color(0x0F, 0x29, 0x42);'}
+  - platform: template
+    id: slot34_label
+    name: "Slot 34 - libelle"
+    mode: text
+    optimistic: true
+    initial_value: "Slot 34"
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot34_title, text: !lambda "return x;" }
+  - platform: template
+    id: slot34_value
+    name: "Slot 34 - valeur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot34_value_lbl, text: !lambda "return x;" }
+      - lambda: |-
+          char *endptr;
+          long v = strtol(x.c_str(), &endptr, 10);
+          if (endptr != x.c_str()) {
+            if (v < 0) v = 0;
+            if (v > 100) v = 100;
+            lv_bar_set_value(id(slot34_bar), (int) v, LV_ANIM_OFF);
+          }
+  - platform: template
+    id: slot34_icon
+    name: "Slot 34 - icone"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 20
+    on_value: [{if: {condition: {lambda: 'return x.rfind("REAL:", 0) == 0;'}, then: [{lambda: "lv_obj_add_flag(id(slot34_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_clear_flag(id(slot34_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {online_image.set_url: {id: slot34_icon_img, url: !lambda 'return id(pc_base_url_text).state + "/slot-icon/34.png?v=" + x.substr(5);'}}], else: [{lambda: "lv_obj_clear_flag(id(slot34_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_add_flag(id(slot34_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {lvgl.label.update: {id: slot34_icon_lbl, text: !lambda "return x;"}}]}}]
+  - platform: template
+    id: slot34_color
+    name: "Slot 34 - couleur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 7
+    on_value:
+      - lvgl.obj.update: {id: slot34_btn, bg_color: !lambda 'return x.length() == 7 ? Color(strtoul(x.substr(1,2).c_str(), nullptr, 16), strtoul(x.substr(3,2).c_str(), nullptr, 16), strtoul(x.substr(5,2).c_str(), nullptr, 16)) : Color(0x0F, 0x29, 0x42);'}
+  - platform: template
+    id: slot35_label
+    name: "Slot 35 - libelle"
+    mode: text
+    optimistic: true
+    initial_value: "Slot 35"
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot35_title, text: !lambda "return x;" }
+  - platform: template
+    id: slot35_value
+    name: "Slot 35 - valeur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot35_value_lbl, text: !lambda "return x;" }
+      - lambda: |-
+          char *endptr;
+          long v = strtol(x.c_str(), &endptr, 10);
+          if (endptr != x.c_str()) {
+            if (v < 0) v = 0;
+            if (v > 100) v = 100;
+            lv_bar_set_value(id(slot35_bar), (int) v, LV_ANIM_OFF);
+          }
+  - platform: template
+    id: slot35_icon
+    name: "Slot 35 - icone"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 20
+    on_value: [{if: {condition: {lambda: 'return x.rfind("REAL:", 0) == 0;'}, then: [{lambda: "lv_obj_add_flag(id(slot35_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_clear_flag(id(slot35_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {online_image.set_url: {id: slot35_icon_img, url: !lambda 'return id(pc_base_url_text).state + "/slot-icon/35.png?v=" + x.substr(5);'}}], else: [{lambda: "lv_obj_clear_flag(id(slot35_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_add_flag(id(slot35_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {lvgl.label.update: {id: slot35_icon_lbl, text: !lambda "return x;"}}]}}]
+  - platform: template
+    id: slot35_color
+    name: "Slot 35 - couleur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 7
+    on_value:
+      - lvgl.obj.update: {id: slot35_btn, bg_color: !lambda 'return x.length() == 7 ? Color(strtoul(x.substr(1,2).c_str(), nullptr, 16), strtoul(x.substr(3,2).c_str(), nullptr, 16), strtoul(x.substr(5,2).c_str(), nullptr, 16)) : Color(0x0F, 0x29, 0x42);'}
+  - platform: template
+    id: slot36_label
+    name: "Slot 36 - libelle"
+    mode: text
+    optimistic: true
+    initial_value: "Slot 36"
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot36_title, text: !lambda "return x;" }
+  - platform: template
+    id: slot36_value
+    name: "Slot 36 - valeur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 24
+    on_value:
+      - lvgl.label.update: { id: slot36_value_lbl, text: !lambda "return x;" }
+      - lambda: |-
+          char *endptr;
+          long v = strtol(x.c_str(), &endptr, 10);
+          if (endptr != x.c_str()) {
+            if (v < 0) v = 0;
+            if (v > 100) v = 100;
+            lv_bar_set_value(id(slot36_bar), (int) v, LV_ANIM_OFF);
+          }
+  - platform: template
+    id: slot36_icon
+    name: "Slot 36 - icone"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 20
+    on_value: [{if: {condition: {lambda: 'return x.rfind("REAL:", 0) == 0;'}, then: [{lambda: "lv_obj_add_flag(id(slot36_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_clear_flag(id(slot36_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {online_image.set_url: {id: slot36_icon_img, url: !lambda 'return id(pc_base_url_text).state + "/slot-icon/36.png?v=" + x.substr(5);'}}], else: [{lambda: "lv_obj_clear_flag(id(slot36_icon_lbl), LV_OBJ_FLAG_HIDDEN); lv_obj_add_flag(id(slot36_icon_widget), LV_OBJ_FLAG_HIDDEN);"}, {lvgl.label.update: {id: slot36_icon_lbl, text: !lambda "return x;"}}]}}]
+  - platform: template
+    id: slot36_color
+    name: "Slot 36 - couleur"
+    mode: text
+    optimistic: true
+    initial_value: ""
+    max_length: 7
+    on_value:
+      - lvgl.obj.update: {id: slot36_btn, bg_color: !lambda 'return x.length() == 7 ? Color(strtoul(x.substr(1,2).c_str(), nullptr, 16), strtoul(x.substr(3,2).c_str(), nullptr, 16), strtoul(x.substr(5,2).c_str(), nullptr, 16)) : Color(0x0F, 0x29, 0x42);'}
+
+select:
+  - platform: template
+    id: slot32_type
+    name: "Slot 32 - type"
+    optimistic: true
+    options: ["bouton", "barre", "texte"]
+    initial_option: "bouton"
+    on_value:
+      - lambda: |-
+          if (x == "barre") {
+            lv_obj_clear_flag(id(slot32_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot32_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot32_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot32_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else if (x == "texte") {
+            lv_obj_add_flag(id(slot32_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot32_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot32_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot32_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot32_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot32_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot32_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot32_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot33_type
+    name: "Slot 33 - type"
+    optimistic: true
+    options: ["bouton", "barre", "texte"]
+    initial_option: "bouton"
+    on_value:
+      - lambda: |-
+          if (x == "barre") {
+            lv_obj_clear_flag(id(slot33_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot33_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot33_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot33_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else if (x == "texte") {
+            lv_obj_add_flag(id(slot33_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot33_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot33_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot33_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot33_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot33_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot33_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot33_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot34_type
+    name: "Slot 34 - type"
+    optimistic: true
+    options: ["bouton", "barre", "texte"]
+    initial_option: "bouton"
+    on_value:
+      - lambda: |-
+          if (x == "barre") {
+            lv_obj_clear_flag(id(slot34_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot34_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot34_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot34_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else if (x == "texte") {
+            lv_obj_add_flag(id(slot34_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot34_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot34_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot34_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot34_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot34_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot34_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot34_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot35_type
+    name: "Slot 35 - type"
+    optimistic: true
+    options: ["bouton", "barre", "texte"]
+    initial_option: "bouton"
+    on_value:
+      - lambda: |-
+          if (x == "barre") {
+            lv_obj_clear_flag(id(slot35_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot35_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot35_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot35_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else if (x == "texte") {
+            lv_obj_add_flag(id(slot35_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot35_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot35_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot35_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot35_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot35_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot35_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot35_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot36_type
+    name: "Slot 36 - type"
+    optimistic: true
+    options: ["bouton", "barre", "texte"]
+    initial_option: "bouton"
+    on_value:
+      - lambda: |-
+          if (x == "barre") {
+            lv_obj_clear_flag(id(slot36_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot36_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot36_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot36_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else if (x == "texte") {
+            lv_obj_add_flag(id(slot36_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(slot36_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot36_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot36_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot36_bar), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot36_value_lbl), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot36_barre_dec), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(slot36_barre_inc), LV_OBJ_FLAG_HIDDEN);
+          }
+
+switch:
+  - platform: template
+    id: slot32_visible
+    name: "Slot 32 - visible"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_obj_clear_flag(id(slot32_btn), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot32_btn), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot33_visible
+    name: "Slot 33 - visible"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_obj_clear_flag(id(slot33_btn), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot33_btn), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot34_visible
+    name: "Slot 34 - visible"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_obj_clear_flag(id(slot34_btn), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot34_btn), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot35_visible
+    name: "Slot 35 - visible"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_obj_clear_flag(id(slot35_btn), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot35_btn), LV_OBJ_FLAG_HIDDEN);
+          }
+  - platform: template
+    id: slot36_visible
+    name: "Slot 36 - visible"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_obj_clear_flag(id(slot36_btn), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(slot36_btn), LV_OBJ_FLAG_HIDDEN);
+          }

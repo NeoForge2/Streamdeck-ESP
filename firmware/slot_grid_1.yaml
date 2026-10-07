@@ -1,0 +1,431 @@
+# Position/taille des emplacements 1 a 18 sur la grille invisible de
+# cases carrees (9 colonnes x 4 lignes, cases de 96px, 12px d'espacement -
+# voir package.yaml::action_grid) - facon "sections" de Home Assistant :
+# chaque emplacement peut occuper 1 ou plusieurs cases, redimensionne/
+# repositionne en direct depuis l'appli PC (glisser-depose/redimensionner,
+# voir dashboard.js), sans reflasher.
+#
+# Une seule entite texte par emplacement (au lieu de 4 nombres separes) -
+# format compact "colonne,ligne,largeur_cases,hauteur_cases", ex "2,1,3,2"
+# = demarre a la colonne 2/ligne 1, large de 3 cases, haut de 2 cases.
+# Le lambda calcule les pixels et repositionne/redimensionne le bouton ET
+# ses sous-widgets (titre/barre/zones tactiles gauche-droite) en
+# proportion - on_clockwise/on_click etc. (slot_widgets.yaml) restent
+# inchanges, seule la geometrie bouge ici.
+#
+# Genere par scripts/gen_slot_grid.py, ne pas editer a la main.
+text:
+  - platform: template
+    id: slot1_grid_text
+    name: "Slot 1 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "0,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot1_btn), px, py);
+          lv_obj_set_size(id(slot1_btn), pw, ph);
+          lv_obj_set_width(id(slot1_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot1_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot1_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot1_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot1_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot1_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot2_grid_text
+    name: "Slot 2 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "1,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot2_btn), px, py);
+          lv_obj_set_size(id(slot2_btn), pw, ph);
+          lv_obj_set_width(id(slot2_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot2_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot2_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot2_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot2_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot2_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot3_grid_text
+    name: "Slot 3 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "2,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot3_btn), px, py);
+          lv_obj_set_size(id(slot3_btn), pw, ph);
+          lv_obj_set_width(id(slot3_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot3_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot3_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot3_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot3_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot3_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot4_grid_text
+    name: "Slot 4 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "3,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot4_btn), px, py);
+          lv_obj_set_size(id(slot4_btn), pw, ph);
+          lv_obj_set_width(id(slot4_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot4_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot4_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot4_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot4_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot4_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot5_grid_text
+    name: "Slot 5 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "4,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot5_btn), px, py);
+          lv_obj_set_size(id(slot5_btn), pw, ph);
+          lv_obj_set_width(id(slot5_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot5_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot5_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot5_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot5_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot5_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot6_grid_text
+    name: "Slot 6 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "5,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot6_btn), px, py);
+          lv_obj_set_size(id(slot6_btn), pw, ph);
+          lv_obj_set_width(id(slot6_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot6_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot6_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot6_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot6_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot6_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot7_grid_text
+    name: "Slot 7 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "6,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot7_btn), px, py);
+          lv_obj_set_size(id(slot7_btn), pw, ph);
+          lv_obj_set_width(id(slot7_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot7_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot7_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot7_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot7_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot7_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot8_grid_text
+    name: "Slot 8 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "7,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot8_btn), px, py);
+          lv_obj_set_size(id(slot8_btn), pw, ph);
+          lv_obj_set_width(id(slot8_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot8_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot8_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot8_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot8_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot8_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot9_grid_text
+    name: "Slot 9 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "8,0,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot9_btn), px, py);
+          lv_obj_set_size(id(slot9_btn), pw, ph);
+          lv_obj_set_width(id(slot9_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot9_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot9_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot9_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot9_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot9_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot10_grid_text
+    name: "Slot 10 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "0,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot10_btn), px, py);
+          lv_obj_set_size(id(slot10_btn), pw, ph);
+          lv_obj_set_width(id(slot10_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot10_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot10_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot10_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot10_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot10_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot11_grid_text
+    name: "Slot 11 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "1,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot11_btn), px, py);
+          lv_obj_set_size(id(slot11_btn), pw, ph);
+          lv_obj_set_width(id(slot11_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot11_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot11_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot11_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot11_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot11_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot12_grid_text
+    name: "Slot 12 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "2,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot12_btn), px, py);
+          lv_obj_set_size(id(slot12_btn), pw, ph);
+          lv_obj_set_width(id(slot12_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot12_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot12_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot12_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot12_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot12_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot13_grid_text
+    name: "Slot 13 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "3,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot13_btn), px, py);
+          lv_obj_set_size(id(slot13_btn), pw, ph);
+          lv_obj_set_width(id(slot13_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot13_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot13_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot13_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot13_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot13_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot14_grid_text
+    name: "Slot 14 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "4,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot14_btn), px, py);
+          lv_obj_set_size(id(slot14_btn), pw, ph);
+          lv_obj_set_width(id(slot14_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot14_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot14_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot14_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot14_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot14_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot15_grid_text
+    name: "Slot 15 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "5,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot15_btn), px, py);
+          lv_obj_set_size(id(slot15_btn), pw, ph);
+          lv_obj_set_width(id(slot15_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot15_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot15_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot15_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot15_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot15_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot16_grid_text
+    name: "Slot 16 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "6,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot16_btn), px, py);
+          lv_obj_set_size(id(slot16_btn), pw, ph);
+          lv_obj_set_width(id(slot16_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot16_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot16_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot16_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot16_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot16_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot17_grid_text
+    name: "Slot 17 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "7,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot17_btn), px, py);
+          lv_obj_set_size(id(slot17_btn), pw, ph);
+          lv_obj_set_width(id(slot17_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot17_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot17_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot17_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot17_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot17_barre_inc), ph > 6 ? ph - 6 : ph);
+  - platform: template
+    id: slot18_grid_text
+    name: "Slot 18 - grille"
+    mode: text
+    optimistic: true
+    initial_value: "8,1,1,1"
+    max_length: 16
+    on_value:
+      - lambda: |-
+          int col=0,row=0,cs=1,rs=1;
+          sscanf(x.c_str(), "%d,%d,%d,%d", &col, &row, &cs, &rs);
+          const int cell=96, gap=12, pitch=108;
+          int px = col*pitch, py = row*pitch;
+          int pw = cs*cell + (cs-1)*gap;
+          int ph = rs*cell + (rs-1)*gap;
+          lv_obj_set_pos(id(slot18_btn), px, py);
+          lv_obj_set_size(id(slot18_btn), pw, ph);
+          lv_obj_set_width(id(slot18_title), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot18_bar), pw > 16 ? pw - 16 : pw);
+          lv_obj_set_width(id(slot18_barre_dec), pw / 2);
+          lv_obj_set_width(id(slot18_barre_inc), pw / 2);
+          lv_obj_set_height(id(slot18_barre_dec), ph > 6 ? ph - 6 : ph);
+          lv_obj_set_height(id(slot18_barre_inc), ph > 6 ? ph - 6 : ph);

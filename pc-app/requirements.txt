@@ -1,0 +1,14 @@
+aioesphomeapi>=29.0.0
+PyYAML>=6.0
+keyboard>=0.13.5 ; sys_platform != "darwin"
+Flask>=3.0.0
+pystray>=0.19.5
+Pillow>=10.0.0
+requests>=2.31.0
+pywin32>=306 ; sys_platform == "win32"
+winshell>=0.6 ; sys_platform == "win32"
+psutil>=5.9 ; sys_platform == "win32"
+pycaw>=20240210 ; sys_platform == "win32"
+comtypes>=1.2 ; sys_platform == "win32"
+icoextract>=0.1.5 ; sys_platform == "win32"
+paho-mqtt>=1.6.1,<2.0

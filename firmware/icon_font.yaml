@@ -1,0 +1,43 @@
+# Police d'icones dediee (glyphes Material Icons, codepoints verifies
+# aupres du fichier officiel MaterialIcons-Regular.codepoints). L'appli PC
+# envoie directement le glyphe (voir pc-app/streamdeck_companion/icons.py),
+# le firmware ne fait qu'afficher le texte recu - glyphs: limite la police
+# embarquee a ce jeu d'icones uniquement (sinon la taille de la police
+# embarquee exploserait). Extrait de package.yaml (voir CLAUDE.md, limite
+# de lignes par fichier) car le catalogue d'icones de pc-app/.../icons.py
+# a ete etendu (22 -> 172 icones) pour couvrir des categories comparables
+# au picker d'icones de Home Assistant (maison/eclairage/climat/meteo/
+# reseau/informatique/securite/loisirs...) - toute icone ajoutee cote PC
+# doit aussi etre ajoutee ici, sinon elle s'affiche comme une case vide.
+font:
+  - file: "gfonts://Material Icons"
+    id: font_icons
+    size: 28
+    glyphs:
+      [
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "",
+        "", "", "", "",
+      ]

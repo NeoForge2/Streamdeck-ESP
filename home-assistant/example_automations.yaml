@@ -1,0 +1,55 @@
+# Exemples d'automations Home Assistant pour le Stream Deck.
+#
+# Le mapping "quel bouton/encodeur fait quoi" se configure desormais dans
+# l'appli PC (voir pc-app/README.md, page http://127.0.0.1:8080) - PAS ici.
+# Ces automations HA sont complementaires : elles utilisent les entites de
+# l'ecran (auto-decouvertes via l'integration ESPHome native) pour des
+# choses que l'appli PC ne fait pas elle-meme (afficher une info HA sur
+# l'ecran, reagir a un evenement HA sans rapport avec le Stream Deck...).
+#
+# A coller/adapter dans configuration.yaml (ou via l'UI Automatisations).
+
+automation:
+  # Pousser l'etat d'une entite HA vers l'ecran (widget "Statut PC" reutilise
+  # ici comme bandeau d'info generique)
+  - alias: "Stream Deck - afficher la temperature exterieure"
+    trigger:
+      - platform: state
+        entity_id: sensor.temperature_exterieure
+    action:
+      - service: text.set_value
+        target:
+          entity_id: text.streamdeck_statut_pc
+        data:
+          value: "Dehors: {{ states('sensor.temperature_exterieure') }} deg C"
+
+  # Alerte visuelle : allumer le retroeclairage a fond si une porte reste
+  # ouverte (le "Retroeclairage ecran" est une light: standard ESPHome)
+  - alias: "Stream Deck - alerte porte ouverte"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.porte_entree
+        to: "on"
+        for: "00:05:00"
+    action:
+      - service: light.turn_on
+        target:
+          entity_id: light.streamdeck_retroeclairage_ecran
+        data:
+          brightness_pct: 100
+
+  # Exemple d'usage du rest_command optionnel (voir rest_command.yaml.snippet) :
+  # declencher une action PC depuis un evenement HA SANS RAPPORT avec le
+  # Stream Deck lui-meme (ici : detection de mouvement -> lance une appli
+  # de surveillance sur le PC). N'a rien a voir avec les 16 emplacements/3
+  # encodeurs, qui sont geres directement par l'appli PC.
+  - alias: "Bonus - mouvement detecte -> ouvre l'appli de surveillance"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.detecteur_mouvement_entree
+        to: "on"
+    action:
+      - service: rest_command.streamdeck_pc_action
+        data:
+          type: "launch"
+          target: "C:\\Program Files\\MaCamApp\\cam.exe"

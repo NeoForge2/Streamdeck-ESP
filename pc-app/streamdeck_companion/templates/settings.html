@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if premiere_fois %}
+  <div class="banner-ok">
+    Bienvenue ! Renseignez au moins l'adresse et la cle API de votre ecran pour commencer -
+    ces reglages ne changent quasiment jamais, vous n'aurez plus besoin d'y revenir ensuite.
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('save_settings') }}">
+    {% if premiere_fois %}<input type="hidden" name="premiere_fois" value="1">{% endif %}
+
+    <div class="card">
+      <h2>Connexion a l'ecran</h2>
+      <div class="grid2">
+        <div>
+          <label>Adresse (IP du Stream Deck)</label>
+          <input type="text" name="conn_host" value="{{ connection.host or '' }}" placeholder="192.168.1.42">
+        </div>
+        <div>
+          <label>Port</label>
+          <input type="text" name="conn_port" value="{{ connection.port or 6053 }}">
+        </div>
+      </div>
+      <label>Cle API (meme valeur que firmware/secrets.yaml)</label>
+      <input type="text" name="conn_key" value="{{ connection.api_key or '' }}">
+      <p class="hint">Repris automatiquement au prochain essai de reconnexion (jusqu'a ~10s) - pas besoin de redemarrer l'icone.</p>
+    </div>
+
+    <div class="card">
+      <h2>Apparence</h2>
+      <label>Forme des boutons</label>
+      <select name="shape">
+        <option value="carre" {% if shape != "rond" %}selected{% endif %}>Carre</option>
+        <option value="rond" {% if shape == "rond" %}selected{% endif %}>Rond</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2>Home Assistant (facultatif)</h2>
+      <div class="grid2">
+        <div>
+          <label>URL (ex http://homeassistant.local:8123)</label>
+          <input type="text" name="ha_url" value="{{ home_assistant.url or '' }}">
+        </div>
+        <div>
+          <label>Jeton d'acces longue duree</label>
+          <input type="text" name="ha_token" value="{{ home_assistant.token or '' }}">
+        </div>
+      </div>
+      <p class="hint">
+        Genere dans HA : profil utilisateur &rarr; bas de page &rarr; "Jetons d'acces longue duree".
+        Necessaire pour les emplacements type "barre"/"texte" avec une source HA, et pour les actions type "home_assistant".
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>MQTT (facultatif)</h2>
+      <div class="grid2">
+        <div>
+          <label>Hote du broker</label>
+          <input type="text" name="mqtt_host" value="{{ mqtt.host or '' }}" placeholder="192.168.1.10">
+        </div>
+        <div>
+          <label>Port</label>
+          <input type="text" name="mqtt_port" value="{{ mqtt.port or 1883 }}">
+        </div>
+        <div>
+          <label>Utilisateur (facultatif)</label>
+          <input type="text" name="mqtt_username" value="{{ mqtt.username or '' }}">
+        </div>
+        <div>
+          <label>Mot de passe (facultatif)</label>
+          <input type="password" name="mqtt_password" value="{{ mqtt.password or '' }}">
+        </div>
+      </div>
+      <label>Sujet de base</label>
+      <input type="text" name="mqtt_base_topic" value="{{ mqtt.base_topic or 'homeassistant/state' }}">
+      <p class="hint">
+        Rend la mise a jour des emplacements barre/texte/couleur quasi instantanee au lieu d'attendre le sondage
+        toutes les 15s. Necessite l'integration <code>mqtt_statestream</code> cote Home Assistant, avec le meme
+        "Sujet de base" (<code>base_topic</code>) - voir le README de l'appli PC. Laisser l'hote vide desactive
+        MQTT (le sondage REST classique continue de fonctionner). Un redemarrage de l'appli est necessaire apres
+        modification de ces reglages.
+      </p>
+    </div>
+
+    <button type="submit">{{ "Continuer vers l'accueil" if premiere_fois else "Enregistrer" }}</button>
+  </form>
+{% endblock %}

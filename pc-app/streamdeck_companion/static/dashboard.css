@@ -1,0 +1,215 @@
+:root {
+  --navy: #0B1929; --ocean: #0F2942; --slate: #1A3A52; --horizon: #1E4060;
+  --signal: #00B4D8; --mist: #8FAFC7; --fog: #6B8BA4; --green-tech: #16B84E; --red: #E63946;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--navy); color: #fff; font-family: 'Inter', sans-serif; padding: 0 16px 100px; }
+
+/* --- Navigation entre les 2 pages (Accueil / Reglages) --- */
+.topnav {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 980px; margin: 0 auto; padding: 20px 0 16px;
+}
+.topnav .brand { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; }
+.topnav .nav-links { display: flex; gap: 20px; }
+.topnav .nav-links a {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--mist);
+  text-decoration: none; padding: 6px 10px; border-radius: 8px;
+}
+.topnav .nav-links a:hover { color: #fff; }
+.topnav .nav-links a.active { color: var(--signal); background: var(--ocean); }
+
+h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 28px; margin: 0 0 4px; }
+h2 { font-family: 'Space Grotesk', sans-serif; font-size: 16px; margin: 0 0 12px; }
+.sub { color: var(--mist); margin: 0 0 24px; font-size: 14px; }
+.page { max-width: 980px; margin: 0 auto; }
+.card { background: var(--ocean); border: 1px solid var(--slate); border-radius: 12px; padding: 20px; margin-bottom: 16px; position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--signal), transparent); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+label { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--mist); display: block; margin-top: 8px; }
+input[type=text], select { background: var(--navy); border: 1px solid var(--slate); border-radius: 8px; color: #fff; padding: 8px 10px; font-family: 'Inter'; font-size: 14px; width: 100%; margin-top: 4px; }
+input:focus, select:focus { outline: none; border-color: var(--signal); }
+button { background: var(--signal); color: var(--navy); border: none; border-radius: 8px; padding: 12px 24px; font-family: 'Space Grotesk'; font-weight: 700; font-size: 15px; cursor: pointer; margin-top: 8px; }
+button:hover { background: #48CAE4; }
+button.secondary { background: transparent; color: var(--mist); border: 1px solid var(--slate); }
+button.secondary:hover { background: var(--slate); color: #fff; }
+button.danger { background: transparent; color: var(--red); border: 1px solid var(--red); }
+button.danger:hover { background: rgba(230,57,70,.12); }
+.banner-ok { background: rgba(22,184,78,.08); border: 1px solid rgba(22,184,78,.3); color: var(--green-tech); padding: 10px 16px; border-radius: 8px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.banner-err { background: rgba(230,57,70,.08); border: 1px solid rgba(230,57,70,.3); color: var(--red); padding: 10px 16px; border-radius: 8px; margin-bottom: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+.hint { color: var(--fog); font-size: 12px; margin-top: 4px; }
+.encoder-block { border-top: 1px solid var(--slate); padding-top: 12px; margin-top: 12px; }
+.encoder-block:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+.encoder-row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; align-items: start; margin-top: 4px; }
+.encoder-ha-fields { margin-top: 6px; }
+.encoder-ha-fields select { margin-top: 6px; width: 100%; }
+
+/* --- Barre de profils (bascule automatique par application) --- */
+.profile-bar {
+  max-width: 760px; margin: 0 auto 14px; display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 8px;
+}
+.profile-tabs { display: flex; flex-wrap: wrap; gap: 6px; }
+.profile-tab {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border-radius: 999px; border: 1px solid var(--slate); background: var(--ocean);
+  color: var(--mist); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  cursor: pointer; white-space: nowrap;
+}
+.profile-tab:hover { border-color: var(--signal); color: #fff; }
+.profile-tab.editing { border-color: var(--signal); background: var(--horizon); color: #fff; }
+.profile-tab .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-tech); }
+.profile-tab .edit-icon { font-family: 'Material Icons'; font-size: 13px; opacity: .7; }
+.profile-tab.add-tab { color: var(--signal); border-style: dashed; }
+.profile-status { display: flex; align-items: center; gap: 8px; }
+.profile-status button { margin-top: 0; padding: 7px 12px; font-size: 12px; }
+#profile-status-text { margin-top: 0; }
+
+/* --- Maquette de l'ecran (memes proportions que le firmware, 1024x600) ---
+ * Sections empilees en colonne, flex-basis calques sur les coordonnees
+ * reelles de firmware/package.yaml (header 64px, grille 700x420 a y:64,
+ * encodeurs 80px a y:488, reste pour le statut) pour que l'apercu
+ * corresponde vraiment a ce qui s'affichera sur l'ecran physique. */
+.screen-mock {
+  width: 100%; max-width: 760px; margin: 0 auto 12px; aspect-ratio: 1024 / 600;
+  background: var(--navy); border: 5px solid #000; border-radius: 18px;
+  display: flex; flex-direction: column; overflow: hidden; padding: 1.3% 2%;
+}
+.screen-header { flex: 0 0 9.3%; min-height: 0; display: flex; align-items: center; gap: 8px; }
+.screen-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: clamp(11px, 2.2vw, 18px); color: #fff; }
+.screen-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green-tech); }
+.screen-grid-wrap { flex: 0 0 70%; min-height: 0; display: flex; justify-content: center; overflow: hidden; }
+/* Grille invisible de 9 colonnes x 4 lignes de cases carrees (voir
+ * firmware/slot_grid.yaml) - chaque tuile se positionne via grid-column/
+ * grid-row (span N), poses en JS depuis dashboard.js::makeTile(). */
+.screen-grid {
+  width: 94.1%; height: 100%;
+  display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(4, 1fr);
+  gap: 1.7%; position: relative; border-radius: 8px; transition: background-color .1s;
+}
+.screen-grid.drag-over, .hidden-tray.drag-over { background: var(--horizon); }
+.screen-encoders { flex: 0 0 13.3%; min-height: 0; display: flex; align-items: center; justify-content: space-evenly; gap: 2%; margin-top: 0.7%; overflow: hidden; }
+.screen-status { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: clamp(8px, 1.4vw, 11px); color: var(--fog); overflow: hidden; }
+
+/* --- Emplacements de la grille (dans la maquette d'ecran) --- */
+.slot-tile {
+  background: var(--ocean); border: 1px solid var(--slate); border-radius: 8px;
+  padding: 4% 6%; cursor: pointer; user-select: none; position: relative; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  transition: border-color .15s;
+}
+.slot-tile.shape-rond { border-radius: 999px; }
+.slot-tile:hover { border-color: var(--signal); }
+.tile-resize-handle {
+  position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px;
+  cursor: nwse-resize; opacity: 0.35; border-right: 2px solid var(--signal); border-bottom: 2px solid var(--signal);
+  border-radius: 0 0 4px 0;
+}
+.tile-resize-handle:hover { opacity: 1; }
+.weather-tile { background: linear-gradient(160deg, var(--ocean), var(--horizon)); border-color: #2A5A7A; }
+.slot-tile .icon { font-family: 'Material Icons'; font-size: clamp(10px, 2.4vw, 20px); color: var(--signal); line-height: 1; }
+.slot-tile .icon img { width: clamp(14px, 3.2vw, 26px); height: clamp(14px, 3.2vw, 26px); border-radius: 5px; display: block; }
+.slot-tile .label {
+  font-size: clamp(7px, 1.6vw, 12px); text-align: center; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.slot-tile.has-widget .label { margin-bottom: 2px; }
+.slot-tile .widget-bar {
+  width: 78%; height: 3px; border-radius: 2px; background: var(--slate); overflow: hidden;
+}
+.slot-tile .widget-bar > span { display: block; height: 100%; width: 0%; background: var(--signal); }
+.slot-tile .widget-value {
+  font-family: 'JetBrains Mono', monospace; font-size: clamp(6px, 1.3vw, 10px); color: var(--mist);
+}
+
+/* --- Cartes encodeurs (maquette, lecture seule - reglage sur /encodeurs) --- */
+.encoder-mock-card {
+  flex: 1; max-width: 30%; height: 82%; background: var(--ocean); border: 1px solid var(--slate);
+  border-radius: 8px; padding: 4% 6%; display: flex; flex-direction: column; justify-content: space-between;
+}
+.encoder-mock-card .icon { font-family: 'Material Icons'; font-size: clamp(9px, 1.8vw, 14px); color: var(--signal); }
+.encoder-mock-card .title { font-family: 'JetBrains Mono', monospace; font-size: clamp(6px, 1.2vw, 9px); color: var(--mist); }
+.encoder-mock-bar { height: 4px; border-radius: 2px; background: var(--slate); overflow: hidden; }
+.encoder-mock-bar > span { display: block; height: 100%; background: var(--signal); width: 0%; }
+
+/* --- Bibliotheque de boutons (hors ecran, App Library-like) --- */
+.hidden-tray-section { margin-top: 20px; }
+.hidden-tray { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.hidden-tray .slot-tile { width: 110px; aspect-ratio: 232/96; opacity: 0.55; }
+.hidden-tray .slot-tile:hover { opacity: 1; }
+.hidden-tray .add-tile {
+  opacity: 1; border-style: dashed; border-color: var(--slate); background: transparent;
+  justify-content: center;
+}
+.hidden-tray .add-tile:hover { border-color: var(--signal); }
+.hidden-tray .add-tile .icon { font-size: 20px; color: var(--signal); font-family: inherit; }
+.hidden-tray .add-tile .label { color: var(--mist); }
+
+/* --- Popup de configuration d'un emplacement --- */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center; z-index: 10;
+}
+.modal-backdrop.hidden { display: none; }
+.modal {
+  background: var(--ocean); border: 1px solid var(--slate); border-radius: 12px;
+  padding: 24px; width: 90%; max-width: 460px; max-height: 85vh; overflow-y: auto;
+}
+.icon-picker {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 6px;
+  max-height: 220px; overflow-y: auto; padding-right: 2px;
+}
+.icon-choice {
+  font-family: 'Material Icons'; font-size: 22px; text-align: center; padding: 8px 0;
+  border: 1px solid var(--slate); border-radius: 8px; cursor: pointer; color: var(--mist);
+}
+.icon-choice:hover { border-color: var(--signal); color: #fff; }
+.icon-choice.selected { border-color: var(--signal); background: var(--horizon); color: var(--signal); }
+.icon-choice.none-choice { font-family: 'Inter'; font-size: 11px; }
+.modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
+#modal-visible { width: auto; margin-top: 4px; }
+
+/* --- Bibliotheque d'applications (picker du type d'action "launch") --- */
+#modal-app-library { margin-top: 6px; }
+.app-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  max-height: 200px; overflow-y: auto; padding: 8px;
+  border: 1px solid var(--slate); border-radius: 8px; background: var(--navy); margin-top: 4px;
+}
+.app-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 4px; border-radius: 8px; cursor: pointer; text-align: center;
+  border: 1px solid transparent; position: relative;
+}
+.app-tile:hover { background: var(--slate); }
+.app-tile.selected { border-color: var(--signal); background: var(--horizon); }
+.app-tile .app-icon { font-family: 'Material Icons'; font-size: 22px; color: var(--signal); line-height: 1; position: relative; }
+.app-tile.add-tile .app-icon { font-family: 'Inter'; font-weight: 700; }
+.app-tile .app-icon .live-dot {
+  position: absolute; top: -2px; right: -6px; width: 7px; height: 7px;
+  border-radius: 50%; background: var(--green-tech); border: 1px solid var(--ocean);
+}
+.app-tile .app-name {
+  font-size: 10px; color: var(--mist); max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.app-tile .app-remove {
+  font-size: 9px; color: var(--red); text-decoration: underline; margin-top: -2px;
+}
+
+/* --- Picker d'entites Home Assistant (source widget, action home_assistant) --- */
+.entity-list {
+  max-height: 160px; overflow-y: auto; margin-top: 4px;
+  border: 1px solid var(--slate); border-radius: 8px; background: var(--navy);
+}
+.entity-list .hint { padding: 8px 10px; margin: 0; }
+.entity-row {
+  display: flex; flex-direction: column; gap: 1px; padding: 6px 10px;
+  cursor: pointer; border-bottom: 1px solid var(--slate);
+}
+.entity-row:last-child { border-bottom: none; }
+.entity-row:hover { background: var(--slate); }
+.entity-row .entity-name { font-size: 13px; color: #fff; }
+.entity-row .entity-meta {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--fog);
+}

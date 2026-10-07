@@ -1,0 +1,16 @@
+# Vraie valeur affichee sur la barre/etiquette de chaque encodeur (voir
+# pc-app/streamdeck_companion/encoder_sync.py) - remplace l'ancien
+# affichage du compteur brut local (voir package.yaml, sensor
+# rotary_encoder) par une valeur poussee par le PC : volume general
+# Windows, volume d'une application, ou une entite Home Assistant
+# (luminosite/volume/vitesse/position/temperature), selon ce que
+# l'encodeur pilote reellement.
+number:
+  - {platform: template, id: encoder1_value_number, name: "Encodeur 1 - valeur reelle", optimistic: true, min_value: 0, max_value: 100, step: 1, initial_value: 0, on_value: [{lvgl.bar.update: {id: bar_encoder1, value: !lambda "return (int) x;"}}]}
+  - {platform: template, id: encoder2_value_number, name: "Encodeur 2 - valeur reelle", optimistic: true, min_value: 0, max_value: 100, step: 1, initial_value: 0, on_value: [{lvgl.bar.update: {id: bar_encoder2, value: !lambda "return (int) x;"}}]}
+  - {platform: template, id: encoder3_value_number, name: "Encodeur 3 - valeur reelle", optimistic: true, min_value: 0, max_value: 100, step: 1, initial_value: 0, on_value: [{lvgl.bar.update: {id: bar_encoder3, value: !lambda "return (int) x;"}}]}
+
+text:
+  - {platform: template, id: encoder1_label_text, name: "Encodeur 1 - affichage", mode: text, optimistic: true, initial_value: "", max_length: 16, on_value: [{lvgl.label.update: {id: lbl_encoder1, text: !lambda "return x;"}}]}
+  - {platform: template, id: encoder2_label_text, name: "Encodeur 2 - affichage", mode: text, optimistic: true, initial_value: "", max_length: 16, on_value: [{lvgl.label.update: {id: lbl_encoder2, text: !lambda "return x;"}}]}
+  - {platform: template, id: encoder3_label_text, name: "Encodeur 3 - affichage", mode: text, optimistic: true, initial_value: "", max_length: 16, on_value: [{lvgl.label.update: {id: lbl_encoder3, text: !lambda "return x;"}}]}

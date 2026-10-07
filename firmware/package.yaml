@@ -1,0 +1,461 @@
+# Package partage du Stream Deck : hardware + UI, rien de secret/specifique
+# a un appareil. Importe via `packages:` (voir ha-device.yaml.example) ou
+# inclus localement (voir streamdeck.yaml). Carte : Guition JC1060P470C_I_W
+# (ESP32-P4 + ESP32-C6, ecran IPS 7" 1024x600, tactile GT911, Wi-Fi/BT via
+# le C6 en co-processeur SDIO). HA et l'appli PC (pc-app/) se connectent
+# tous deux a la MEME API native ESPHome chiffree (aioesphomeapi cote PC).
+# GPIO encodeurs : uniquement ceux confirmes disponibles sur le header
+# d'extension (colonne gauche GPIO1-5/20/32/33, droite GPIO45-47). GPIO5 =
+# reset interne de la dalle, evitez-le. Verifiez contre votre revision.
+# IMPORTANT - puce ES (engineering sample) : voir streamdeck.yaml (cle
+# esp32.board) pour le crash de boot et son correctif - ESPHome <= 2026.2.x
+# + board explicite requis.
+esp32:
+  flash_size: 16MB
+  cpu_frequency: 360MHZ
+  framework:
+    type: esp-idf
+    advanced:
+      enable_idf_experimental_features: true
+
+# Le P4 n'a pas de radio: le C6 embarque le Wi-Fi/BT et sert de co-processeur
+# "hosted" relie en SDIO.
+esp32_hosted:
+  variant: esp32c6
+  reset_pin: GPIO54
+  cmd_pin: GPIO19
+  clk_pin: GPIO18
+  d0_pin: GPIO14
+  d1_pin: GPIO15
+  d2_pin: GPIO16
+  d3_pin: GPIO17
+  active_high: true
+
+psram:
+  mode: hex
+  speed: 200MHz
+
+# Alimente le PHY MIPI-DSI de l'ecran (obligatoire sur ESP32-P4)
+esp_ldo:
+  - channel: 3
+    voltage: 2.5V
+
+# Tactile GT911 (bus I2C interne, pas sur le header)
+i2c:
+  - id: bus_a
+    sda: GPIO7
+    scl: GPIO8
+    frequency: 400kHz
+
+# Pas de transform ici : la dalle est utilisee dans son orientation native
+# (rotation: 0, valeur par defaut de display.mipi_dsi). swap_xy/mirror_y
+# etaient necessaires dans la config communautaire de reference parce que sa
+# dalle etait montee a 90 - ce n'est pas notre cas, ca decalait le tactile.
+touchscreen:
+  - platform: gt911
+    id: my_touchscreen
+    i2c_id: bus_a
+    reset_pin: GPIO22
+    interrupt_pin: GPIO21
+
+# Retroeclairage
+output:
+  - platform: ledc
+    pin: GPIO23
+    id: gpio_backlight_pwm
+
+light:
+  - platform: monochromatic
+    output: gpio_backlight_pwm
+    name: "Retroeclairage ecran"
+    id: display_backlight
+    restore_mode: ALWAYS_ON
+    default_transition_length: 0s
+
+# Dalle MIPI-DSI - le modele JC1060P470 est fourni nativement par ESPHome
+# (timings corrects deja integres, pas besoin de les redefinir)
+display:
+  - platform: mipi_dsi
+    id: my_display
+    model: JC1060P470
+    reset_pin:
+      number: GPIO5
+    update_interval: never
+    auto_clear_enabled: false
+
+binary_sensor:
+  - platform: status
+    name: "Stream Deck en ligne"
+    id: status_online
+    on_state:
+      - lvgl.obj.update:
+          id: status_dot
+          bg_color: !lambda "return x ? Color(0x16, 0xB8, 0x4E) : Color(0xE6, 0x39, 0x46);"
+
+  # --- Boutons des encodeurs rotatifs (clic sur l'axe) ---
+  - platform: gpio
+    id: encoder1_button
+    name: "Encodeur 1 - bouton"
+    pin:
+      number: GPIO3
+      mode: INPUT_PULLUP
+      inverted: true
+    on_press:
+      - event.trigger: { id: encoder1_event, event_type: "press" }
+      - lvgl.obj.update:
+          id: encoder1_card
+          border_color: 0x00B4D8
+          bg_color: 0x1E4060
+    on_release:
+      - lvgl.obj.update:
+          id: encoder1_card
+          border_color: 0x1A3A52
+          bg_color: 0x0F2942
+  - platform: gpio
+    id: encoder2_button
+    name: "Encodeur 2 - bouton"
+    pin:
+      number: GPIO32
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on_off: 25ms
+    on_press:
+      - event.trigger: { id: encoder2_event, event_type: "press" }
+      - lvgl.obj.update:
+          id: encoder2_card
+          border_color: 0x00B4D8
+          bg_color: 0x1E4060
+    on_release:
+      - lvgl.obj.update:
+          id: encoder2_card
+          border_color: 0x1A3A52
+          bg_color: 0x0F2942
+  - platform: gpio
+    id: encoder3_button
+    name: "Encodeur 3 - bouton"
+    pin:
+      number: GPIO46
+      mode: INPUT_PULLUP
+      inverted: true
+    filters:
+      - delayed_on_off: 25ms
+    on_press:
+      - event.trigger: { id: encoder3_event, event_type: "press" }
+      - lvgl.obj.update:
+          id: encoder3_card
+          border_color: 0x00B4D8
+          bg_color: 0x1E4060
+    on_release:
+      - lvgl.obj.update:
+          id: encoder3_card
+          border_color: 0x1A3A52
+          bg_color: 0x0F2942
+
+# Encodeurs rotatifs - 3 par defaut, ajustables selon ce que vous avez achete.
+# Pour en ajouter/retirer : dupliquer un bloc sensor+binary_sensor+event avec
+# des GPIO libres (il reste GPIO47 sur le header dans ce mapping). La barre/
+# etiquette (lbl_encoderN/bar_encoderN) n'est plus mise a jour ici : elle est
+# pilotee par l'appli PC (voir encoder_sync.yaml), qui affiche la vraie
+# valeur pilotee (volume Windows/appli/entite HA) plutot que ce compteur
+# brut local - on_clockwise/on_anticlockwise restent inchanges (declenchent
+# toujours les actions configurees).
+sensor:
+  - platform: rotary_encoder
+    id: encoder1_value
+    name: "Encodeur 1"
+    min_value: 0
+    max_value: 100
+    publish_initial_value: true
+    pin_a:
+      number: GPIO1
+      mode: INPUT_PULLUP
+    pin_b:
+      number: GPIO2
+      mode: INPUT_PULLUP
+    on_clockwise:
+      - event.trigger: { id: encoder1_event, event_type: "clockwise" }
+    on_anticlockwise:
+      - event.trigger: { id: encoder1_event, event_type: "anticlockwise" }
+  - platform: rotary_encoder
+    id: encoder2_value
+    name: "Encodeur 2"
+    min_value: 0
+    max_value: 100
+    publish_initial_value: true
+    pin_a:
+      number: GPIO4
+      mode: INPUT_PULLUP
+    pin_b:
+      number: GPIO20
+      mode: INPUT_PULLUP
+    on_clockwise:
+      - event.trigger: { id: encoder2_event, event_type: "clockwise" }
+    on_anticlockwise:
+      - event.trigger: { id: encoder2_event, event_type: "anticlockwise" }
+  - platform: rotary_encoder
+    id: encoder3_value
+    name: "Encodeur 3"
+    min_value: 0
+    max_value: 100
+    publish_initial_value: true
+    pin_a:
+      number: GPIO33
+      mode: INPUT_PULLUP
+    pin_b:
+      number: GPIO45
+      mode: INPUT_PULLUP
+    on_clockwise:
+      - event.trigger: { id: encoder3_event, event_type: "clockwise" }
+    on_anticlockwise:
+      - event.trigger: { id: encoder3_event, event_type: "anticlockwise" }
+
+# ---------------------------------------------------------------------------
+# Entites "event" - consommees a la fois par Home Assistant (declencheurs
+# d'automation natifs) et par l'appli PC (aioesphomeapi) pour mapper vers des
+# actions locales (raccourcis, media, volume, lancement d'appli...).
+# ---------------------------------------------------------------------------
+event:
+  - platform: template
+    id: encoder1_event
+    name: "Encodeur 1 - evenement"
+    event_types: ["clockwise", "anticlockwise", "press"]
+  - platform: template
+    id: encoder2_event
+    name: "Encodeur 2 - evenement"
+    event_types: ["clockwise", "anticlockwise", "press"]
+  - platform: template
+    id: encoder3_event
+    name: "Encodeur 3 - evenement"
+    event_types: ["clockwise", "anticlockwise", "press"]
+  - platform: template
+    id: action_button_event
+    name: "Bouton d'action ecran"
+    # action_N clic, hold_N appui long (mode couleur), barre_inc/dec_N
+    # (tactile sur un widget barre), close_color_mode (bouton "X").
+    event_types:
+      [
+        "action_1", "action_2", "action_3", "action_4", "action_5", "action_6", "action_7", "action_8",
+        "action_9", "action_10", "action_11", "action_12", "action_13", "action_14", "action_15", "action_16",
+        "action_17", "action_18", "action_19", "action_20", "action_21", "action_22", "action_23", "action_24",
+        "action_25", "action_26", "action_27", "action_28", "action_29", "action_30", "action_31", "action_32",
+        "action_33", "action_34", "action_35", "action_36",
+        "hold_1", "hold_2", "hold_3", "hold_4", "hold_5", "hold_6", "hold_7", "hold_8",
+        "hold_9", "hold_10", "hold_11", "hold_12", "hold_13", "hold_14", "hold_15", "hold_16",
+        "hold_17", "hold_18", "hold_19", "hold_20", "hold_21", "hold_22", "hold_23", "hold_24",
+        "hold_25", "hold_26", "hold_27", "hold_28", "hold_29", "hold_30", "hold_31", "hold_32",
+        "hold_33", "hold_34", "hold_35", "hold_36",
+        "barre_inc_1", "barre_inc_2", "barre_inc_3", "barre_inc_4", "barre_inc_5", "barre_inc_6", "barre_inc_7", "barre_inc_8",
+        "barre_inc_9", "barre_inc_10", "barre_inc_11", "barre_inc_12", "barre_inc_13", "barre_inc_14", "barre_inc_15", "barre_inc_16",
+        "barre_inc_17", "barre_inc_18", "barre_inc_19", "barre_inc_20", "barre_inc_21", "barre_inc_22", "barre_inc_23", "barre_inc_24",
+        "barre_inc_25", "barre_inc_26", "barre_inc_27", "barre_inc_28", "barre_inc_29", "barre_inc_30", "barre_inc_31", "barre_inc_32",
+        "barre_inc_33", "barre_inc_34", "barre_inc_35", "barre_inc_36",
+        "barre_dec_1", "barre_dec_2", "barre_dec_3", "barre_dec_4", "barre_dec_5", "barre_dec_6", "barre_dec_7", "barre_dec_8",
+        "barre_dec_9", "barre_dec_10", "barre_dec_11", "barre_dec_12", "barre_dec_13", "barre_dec_14", "barre_dec_15", "barre_dec_16",
+        "barre_dec_17", "barre_dec_18", "barre_dec_19", "barre_dec_20", "barre_dec_21", "barre_dec_22", "barre_dec_23", "barre_dec_24",
+        "barre_dec_25", "barre_dec_26", "barre_dec_27", "barre_dec_28", "barre_dec_29", "barre_dec_30", "barre_dec_31", "barre_dec_32",
+        "barre_dec_33", "barre_dec_34", "barre_dec_35", "barre_dec_36",
+        "close_color_mode", "close_ha_popup", "popup_next", "popup_prev",
+      ]
+
+# Client HTTP pour les vraies icones d'appli/jeu (voir slot_icons.yaml,
+# icon_extract.py cote PC) - reseau local uniquement.
+http_request: {id: http_client, verify_ssl: false, timeout: 3s}
+
+# Texte pousse par l'appli PC (titre en cours, volume, notification...) et
+# affiche sur l'ecran. Ecrit via l'API native (text_command), pas de HTTP.
+text:
+  - platform: template
+    id: pc_status_text
+    name: "Statut PC"
+    mode: text
+    optimistic: true
+    initial_value: "PC hors ligne"
+    max_length: 64
+    on_value:
+      - lvgl.label.update:
+          id: lbl_pc_status
+          text: !lambda "return x;"
+  # URL de base de l'appli PC (ex: "http://192.168.1.42:8080"), poussee une
+  # fois a la connexion - sert de prefixe aux URL d'icones (slot_icons.yaml).
+  - {platform: template, id: pc_base_url_text, name: "PC - URL locale", mode: text, optimistic: true, initial_value: "", max_length: 48}
+
+# Entites number pilotant les 3 sliders du panneau de reglage couleur
+# (voir color_mode_panel.yaml) - source de verite unique, ecrite par
+# l'appli PC (encodeurs) ET par l'ecran (glissement tactile, number.set) ;
+# chaque cote ne fait que refleter l'autre (lvgl.slider/label.update).
+number:
+  - {platform: template, id: color_mode_hue_number, name: "Mode couleur - teinte (valeur)", optimistic: true, min_value: 0, max_value: 359, step: 1, initial_value: 0, on_value: [{lvgl.label.update: {id: color_mode_lbl_hue, text: !lambda "return to_string((int) x) + \"°\";"}}, {lvgl.slider.update: {id: color_mode_slider_hue, value: !lambda "return (int) x;"}}]}
+  - {platform: template, id: color_mode_kelvin_number, name: "Mode couleur - chaleur (valeur)", optimistic: true, min_value: 2000, max_value: 6500, step: 1, initial_value: 3000, on_value: [{lvgl.label.update: {id: color_mode_lbl_kelvin, text: !lambda "return to_string((int) x) + \"K\";"}}, {lvgl.slider.update: {id: color_mode_slider_kelvin, value: !lambda "return (int) x;"}}]}
+  - {platform: template, id: color_mode_brightness_number, name: "Mode couleur - intensite (valeur)", optimistic: true, min_value: 0, max_value: 100, step: 1, initial_value: 100, on_value: [{lvgl.slider.update: {id: color_mode_bar_brightness, value: !lambda "return (int) x;"}}, {lvgl.label.update: {id: color_mode_lbl_brightness, text: !lambda "return to_string((int) x) + \"%\";"}}]}
+
+# Pilote la visibilite du bouton "X" flottant et du panneau de reglage
+# couleur (voir plus bas) - l'appli PC l'active en reponse a un appui long
+# sur un emplacement lie a une ampoule.
+switch:
+  - platform: template
+    id: color_mode_active_switch
+    name: "Mode couleur actif"
+    optimistic: true
+    on_state:
+      - lambda: |-
+          if (x) {
+            lv_obj_clear_flag(id(color_mode_close_btn), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(color_mode_panel), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(encoder_cards_row), LV_OBJ_FLAG_HIDDEN);
+          } else {
+            lv_obj_add_flag(id(color_mode_close_btn), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(color_mode_panel), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(id(encoder_cards_row), LV_OBJ_FLAG_HIDDEN);
+          }
+
+# ---------------------------------------------------------------------------
+# 36 emplacements physiques configurables (boutons/widgets, un par case de
+# la grille invisible 9x4) - entites generees dans slots_1_5/6_11/12_16.yaml
+# (ecrites a la main avant l'ajout de scripts/gen_slot_entities.py) puis
+# slots_17_21/22_26/27_31/32_36.yaml (generees par ce script, memes
+# emplacements 17-36, decoupees pour rester sous 500 lignes chacune).
+# Chaque emplacement expose libelle/valeur/icone/type/visibilite, pilotable
+# a chaud depuis l'appli PC (pc-app/streamdeck_companion) sans reflasher -
+# seuls ceux assignes a une entree de bibliotheque (voir docs/ARCHITECTURE.md)
+# sont visibles a l'ecran.
+# ---------------------------------------------------------------------------
+packages:
+  slots_1_5: !include slots_1_5.yaml
+  slots_6_11: !include slots_6_11.yaml
+  slots_12_16: !include slots_12_16.yaml
+  slots_17_21: !include slots_17_21.yaml
+  slots_22_26: !include slots_22_26.yaml
+  slots_27_31: !include slots_27_31.yaml
+  slots_32_36: !include slots_32_36.yaml
+  slot_icons: !include slot_icons.yaml
+  ha_popup: !include ha_popup.yaml
+  encoder_sync: !include encoder_sync.yaml
+  icon_font: !include icon_font.yaml
+  slot_grid_1: !include slot_grid_1.yaml
+  slot_grid_2: !include slot_grid_2.yaml
+  weather_card: !include weather_card.yaml
+  button_shape: !include button_shape.yaml
+
+# ---------------------------------------------------------------------------
+# Forme des boutons - voir button_shape.yaml (genere par
+# scripts/gen_button_shape.py, extrait de ce fichier pour rester sous 500
+# lignes une fois les 36 emplacements ajoutes).
+# ---------------------------------------------------------------------------
+# Polices Google Fonts du design system (telechargees et converties au build)
+# ---------------------------------------------------------------------------
+font:
+  - file: "gfonts://Space Grotesk@600"
+    id: font_title
+    size: 26
+  - file: "gfonts://Inter"
+    id: font_body
+    size: 16
+  - file: "gfonts://JetBrains Mono@500"
+    id: font_mono
+    size: 15
+  - file: "gfonts://JetBrains Mono@700"
+    id: font_mono_bold
+    size: 22
+  - file: "gfonts://JetBrains Mono@700"
+    id: font_mono_xl
+    size: 34
+
+# Pas d'image externe ici volontairement : un chemin de fichier dans un
+# package importe via `packages: url:` (HA) se resolvent par rapport au
+# fichier LOCAL qui importe le package, pas par ce fichier recupere sur
+# GitHub - casserait la compilation cote HA (d'ou le panneau couleur en
+# formes LVGL plutot qu'en degrade image). logo.png reste dans le repo
+# pour un usage web/print, pas affiche sur cet ecran.
+
+# ---------------------------------------------------------------------------
+# Interface LVGL - palette design system :
+#   fond   navy   #0B1929   surface ocean #0F2942   bordure slate #1A3A52
+#   accent signal #00B4D8   texte secondaire mist #8FAFC7
+#   statut ok green-tech #16B84E   statut danger red #E63946
+# ---------------------------------------------------------------------------
+lvgl:
+  displays: my_display
+  touchscreens: my_touchscreen
+  color_depth: 16
+  byte_order: little_endian
+  buffer_size: 100%
+  pages:
+    - id: home_page
+      bg_color: 0x0B1929
+      widgets:
+        # Barre du haut : titre, pastille d'etat
+        - obj:
+            height: 64
+            width: 100%
+            align: top_mid
+            bg_opa: transp
+            border_width: 0
+            pad_all: 8
+            layout:
+              type: flex
+              flex_flow: row
+              flex_align_cross: center
+              flex_align_main: start
+            widgets:
+              - label:
+                  text: "STREAM DECK"
+                  text_font: font_title
+                  text_color: 0xFFFFFF
+              - obj:
+                  id: status_dot
+                  width: 14
+                  height: 14
+                  radius: 7
+                  x: 200
+                  bg_color: 0xE63946
+                  border_width: 0
+
+        # Grille invisible de 16 emplacements configurables (boutons/widgets),
+        # facon "sections" de Home Assistant : 9 colonnes x 4 lignes de cases
+        # carrees de 96px (espacement 12px) -> 960x420, centree (align:
+        # top_mid) avec ~32px de marge symetrique sur l'ecran de 1024px.
+        # Chaque emplacement peut occuper 1 ou plusieurs cases - PAS de
+        # layout flex ici (contrairement a avant) : chaque bouton est
+        # positionne/dimensionne individuellement (align: top_left + x/y/
+        # width/height explicites dans slot_widgets.yaml), mis a jour en
+        # direct par le lambda de son entite "Slot N - grille" (voir
+        # slot_grid.yaml) des que l'appli PC pousse une nouvelle disposition
+        # (glisser-deposer/redimensionner, sans reflasher). Forme (carre/
+        # rond) pilotee par "button_shape", contenu/visibilite par les
+        # entites generees dans slots_*.yaml (voir docs/ARCHITECTURE.md).
+        - obj:
+            id: action_grid
+            height: 420
+            width: 960
+            y: 64
+            align: top_mid
+            bg_opa: transp
+            border_width: 0
+            pad_all: 0
+            widgets: !include slot_widgets.yaml
+
+        # Bas d'ecran : 3 cartes encodeurs + statut PC - masque pendant le
+        # mode reglage couleur (voir color_mode_active_switch).
+        - obj:
+            id: encoder_cards_row
+            height: 80
+            width: 100%
+            y: 488
+            bg_opa: transp
+            border_width: 0
+            pad_all: 4
+            layout:
+              type: flex
+              flex_flow: row
+              flex_align_cross: center
+              flex_align_main: space_evenly
+            widgets: !include encoder_cards.yaml
+
+        - {label: {id: lbl_pc_status, text: "PC hors ligne", text_font: font_mono, text_color: 0x6B8BA4, align: bottom_mid, y: -8}}
+
+        # Panneau mode couleur (color_mode_panel.yaml, limite de lignes) -
+        # enveloppe pleine page car !include ne remplace qu'une cle.
+        - {obj: {width: "100%", height: "100%", bg_opa: transp, border_width: 0, clickable: false, widgets: !include color_mode_panel.yaml}}
+        # Popup tactile adaptee (tap ampoule/lecteur) - voir ha_popup.yaml.
+        - {obj: {width: "100%", height: "100%", bg_opa: transp, border_width: 0, clickable: false, widgets: !include ha_popup_panel.yaml}}

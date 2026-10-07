@@ -1,0 +1,21 @@
+# OPTIONNEL / BONUS - pas necessaire au fonctionnement de base du Stream
+# Deck (l'appli PC gere deja directement les boutons/encodeurs, voir
+# pc-app/README.md). Ce snippet sert seulement si vous voulez qu'une
+# automation Home Assistant SANS RAPPORT avec le Stream Deck (ex: un
+# capteur de mouvement) puisse aussi declencher une action sur ce PC.
+#
+# A ajouter dans configuration.yaml (redemarrer HA apres modification).
+# Definit le service "rest_command.streamdeck_pc_action".
+#
+# Remplacez l'IP par celle du PC, et le token par celui de
+# pc-app/dashboard_config.yaml (cle receiver.token - vide/desactive par
+# defaut, a renseigner pour activer cette fonctionnalite bonus).
+
+rest_command:
+  streamdeck_pc_action:
+    url: "http://192.168.1.XX:8765/run"
+    method: POST
+    headers:
+      X-Auth-Token: "REMPLACER_PAR_receiver.token_DE_DASHBOARD_CONFIG_YAML"
+      Content-Type: "application/json"
+    payload: '{"type": "{{ type }}", "target": {{ target | tojson }}}'
