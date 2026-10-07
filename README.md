@@ -54,16 +54,3 @@ mapping des GPIO : `docs/WIRING.md`.
 - 36 emplacements carres/ronds (bouton, jauge ou texte) + 3 encodeurs
   rotatifs, ajustable dans `firmware/package.yaml`/`slots_*.yaml` et
   `docs/WIRING.md`
-
-
-## A propos de `ruflo`
-
-Le meta-framework d'orchestration multi-agents
-[`ruvnet/ruflo`](https://github.com/ruvnet/ruflo) a ete initialise dans ce
-depot a la demande explicite du proprietaire (`npx ruflo init`, dossiers
-`.claude/`, `.claude-flow/`, `CLAUDE.md`, `.mcp.json`). Le developpement de ce
-projet a ete fait directement, sans passer par son systeme de swarm/agents
-(inutile pour un firmware ESPHome + un script Python). Ses hooks
-(`.claude/settings.json`) interceptent chaque appel Bash/Write/Edit d'un
-futur assistant sur ce depot et injectent parfois une pub pour un service
-tiers ("sponsored capacity") - a desactiver si non souhaite.
