@@ -1,4 +1,4 @@
-# Exemples d'automations Home Assistant pour le Stream Deck.
+﻿# Exemples d'automations Home Assistant pour le Stream Deck.
 #
 # Le mapping "quel bouton/encodeur fait quoi" se configure desormais dans
 # l'appli PC (voir pc-app/README.md, page http://127.0.0.1:8080) - PAS ici.
@@ -41,7 +41,7 @@ automation:
   # Exemple d'usage du rest_command optionnel (voir rest_command.yaml.snippet) :
   # declencher une action PC depuis un evenement HA SANS RAPPORT avec le
   # Stream Deck lui-meme (ici : detection de mouvement -> lance une appli
-  # de surveillance sur le PC). N'a rien a voir avec les 16 emplacements/3
+  # de surveillance sur le PC). N'a rien a voir avec les 36 slots/3
   # encodeurs, qui sont geres directement par l'appli PC.
   - alias: "Bonus - mouvement detecte -> ouvre l'appli de surveillance"
     trigger:

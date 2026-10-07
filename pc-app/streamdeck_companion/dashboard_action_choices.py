@@ -10,7 +10,7 @@ from typing import Any, Mapping
 
 
 NONE_ACTION_ID = "none"
-NONE_ACTION_NAME = "Aucune"
+NONE_ACTION_NAME = "None"
 
 
 def action_choices(catalog: Mapping[str, Any], input_kind: str) -> tuple[dict[str, str], ...]:

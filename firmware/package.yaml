@@ -1,4 +1,4 @@
-# Package partage du Stream Deck : hardware + UI, rien de secret/specifique
+﻿# Package partage du Stream Deck : hardware + UI, rien de secret/specifique
 # a un appareil. Importe via `packages:` (voir ha-device.yaml.example) ou
 # inclus localement (voir streamdeck.yaml). Carte : Guition JC1060P470C_I_W
 # (ESP32-P4 + ESP32-C6, ecran IPS 7" 1024x600, tactile GT911, Wi-Fi/BT via
@@ -285,7 +285,7 @@ text:
 # l'appli PC (encodeurs) ET par l'ecran (glissement tactile, number.set) ;
 # chaque cote ne fait que refleter l'autre (lvgl.slider/label.update).
 number:
-  - {platform: template, id: color_mode_hue_number, name: "Mode couleur - teinte (valeur)", optimistic: true, min_value: 0, max_value: 359, step: 1, initial_value: 0, on_value: [{lvgl.label.update: {id: color_mode_lbl_hue, text: !lambda "return to_string((int) x) + \"°\";"}}, {lvgl.slider.update: {id: color_mode_slider_hue, value: !lambda "return (int) x;"}}]}
+  - {platform: template, id: color_mode_hue_number, name: "Mode couleur - teinte (valeur)", optimistic: true, min_value: 0, max_value: 359, step: 1, initial_value: 0, on_value: [{lvgl.label.update: {id: color_mode_lbl_hue, text: !lambda "return to_string((int) x) + \"Â°\";"}}, {lvgl.slider.update: {id: color_mode_slider_hue, value: !lambda "return (int) x;"}}]}
   - {platform: template, id: color_mode_kelvin_number, name: "Mode couleur - chaleur (valeur)", optimistic: true, min_value: 2000, max_value: 6500, step: 1, initial_value: 3000, on_value: [{lvgl.label.update: {id: color_mode_lbl_kelvin, text: !lambda "return to_string((int) x) + \"K\";"}}, {lvgl.slider.update: {id: color_mode_slider_kelvin, value: !lambda "return (int) x;"}}]}
   - {platform: template, id: color_mode_brightness_number, name: "Mode couleur - intensite (valeur)", optimistic: true, min_value: 0, max_value: 100, step: 1, initial_value: 100, on_value: [{lvgl.slider.update: {id: color_mode_bar_brightness, value: !lambda "return (int) x;"}}, {lvgl.label.update: {id: color_mode_lbl_brightness, text: !lambda "return to_string((int) x) + \"%\";"}}]}
 
@@ -411,7 +411,7 @@ lvgl:
                   bg_color: 0xE63946
                   border_width: 0
 
-        # Grille invisible de 16 emplacements configurables (boutons/widgets),
+        # Invisible grid of 36 configurable slots (boutons/widgets),
         # facon "sections" de Home Assistant : 9 colonnes x 4 lignes de cases
         # carrees de 96px (espacement 12px) -> 960x420, centree (align:
         # top_mid) avec ~32px de marge symetrique sur l'ecran de 1024px.

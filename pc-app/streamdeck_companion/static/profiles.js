@@ -93,7 +93,7 @@ document.getElementById("profile-force-btn").addEventListener("click", () => {
       manualOverride = true;
       renderProfileTabs();
     })
-    .catch(() => alert("Impossible de contacter l'appli."));
+    .catch(() => alert("Unable to contact the application."));
 });
 
 document.getElementById("profile-auto-btn").addEventListener("click", () => {
@@ -173,7 +173,7 @@ function loadOpenWindows() {
     })
     .catch(() => {
       select.innerHTML = '<option value="">— Indisponible —</option>';
-      status.textContent = "Impossible de charger la liste - tapez le nom du processus a la main ci-dessous.";
+      status.textContent = "Unable to load the list. Enter the process name manually below.";
     });
 }
 

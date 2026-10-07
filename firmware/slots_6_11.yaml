@@ -1,5 +1,5 @@
-# Entites des emplacements 6 a 11 (voir docs/ARCHITECTURE.md pour le
-# systeme de 16 emplacements configurables). Genere, ne pas editer a la main.
+﻿# Entites des emplacements 6 a 11 (voir docs/ARCHITECTURE.md pour le
+# 36-slot configurable system). Genere, ne pas editer a la main.
 text:
   - platform: template
     id: slot6_label

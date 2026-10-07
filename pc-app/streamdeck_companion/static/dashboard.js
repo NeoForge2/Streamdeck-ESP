@@ -753,7 +753,7 @@ function loadAudioSessionsIfNeeded(callback) {
     })
     .catch(() => {
       audioSessions = [];
-      callback("Impossible de contacter l'appli.");
+      callback("Unable to contact the application.");
     });
 }
 

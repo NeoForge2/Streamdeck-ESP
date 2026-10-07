@@ -1,112 +1,174 @@
-# Copiez ce fichier en "dashboard_config.yaml" (ignore par git).
+﻿# Copy this file to "dashboard_config.yaml".
+# dashboard_config.yaml is ignored by Git.
 #
-# Vous pouvez remplir ce fichier a la main pour demarrer, mais l'idee est de
-# tout regler ensuite depuis la page de configuration visuelle
-# (icone barre des taches > "Configurer le Stream Deck").
+# You can edit this file manually to get started, but most settings can then
+# be managed from the companion application's visual configuration interface.
 
 connection:
-  host: "192.168.1.XX"        # IP du Stream Deck (voir Home Assistant > l'appareil > Adresse IP)
+  host: "192.168.1.XX"        # Stream Deck IP address
   port: 6053
-  api_key: "REMPLACER_PAR_LA_MEME_CLE_QUE_LE_FIRMWARE"
+  api_key: "REPLACE_WITH_THE_SAME_KEY_AS_THE_FIRMWARE"
 
-# "carre" ou "rond"
+# Legacy internal values kept for backward compatibility:
+#   carre = square
+#   rond  = round
 shape: "carre"
 
-# Optionnel : connexion a Home Assistant, pour les emplacements type
-# "barre"/"texte" (etat en direct d'une entite) et les actions type
-# "home_assistant" (appelle un service HA). Jeton genere dans HA : profil
-# utilisateur > bas de page > "Jetons d'acces longue duree".
+# Optional Home Assistant connection.
+#
+# Used by "barre" and "texte" slots to display live entity states, and by
+# "home_assistant" actions to call Home Assistant services.
 home_assistant:
   url: ""
   token: ""
 
-# Un ou plusieurs profils - chacun sa propre grille de 16 emplacements + 3
-# encodeurs. Le profil sans "trigger" (ici "Defaut") s'affiche par defaut ;
-# les autres s'activent automatiquement des que l'application indiquee par
-# leur trigger.process passe au premier plan sur le PC (voir
-# streamdeck_companion/profile_watcher.py - Windows uniquement pour la
-# bascule automatique). Un seul profil suffit si vous n'avez pas besoin de
-# grilles differentes par application.
+# One or more profiles.
+#
+# Each profile has its own 36-slot grid and 3 rotary encoders.
+# The profile without a trigger is used as the default profile.
+#
+# Internal slot type values are intentionally kept unchanged for backward
+# compatibility:
+#   bouton = button
+#   barre  = bar
+#   texte  = text
+#
+# action.type:
+#   none
+#   keys
+#   launch
+#   url
+#   media
+#   home_assistant
+
 profiles:
   - name: "Defaut"
     trigger: null
-    # 16 entrees, une par emplacement de l'ecran (dans l'ordre : Slot 1 a
-    # Slot 16). 12 visibles par defaut (comme l'ancien systeme a 12
-    # boutons), les 4 derniers desactives - activables a la demande depuis
-    # la page de configuration, sans reflasher.
-    #
-    # type: bouton (action au clic) / barre (jauge 0-100, source HA) /
-    #       texte (valeur + unite, source HA)
-    # icon: cle du catalogue pc-app/streamdeck_companion/icons.py (ex
-    #       "play_arrow", "volume_up", "home", "wb_sunny"...), ou "" pour aucune.
-    # action.type: none / keys / launch / url / media / home_assistant
-    #   home_assistant: {domain, service, entity_id, data} - ex bascule une
-    #   lumiere: {type: home_assistant, domain: light, service: toggle, entity_id: light.bureau}
-    # ha_entity: entity_id HA a lire pour les types barre/texte (rafraichi ~15s)
+
     slots:
       - { label: "Discord", icon: "mic", type: "bouton", visible: true,
           action: { type: "launch", target: "%LOCALAPPDATA%\\Discord\\Update.exe --processStart Discord.exe" } }
-      - { label: "Navigateur", icon: "", type: "bouton", visible: true,
+
+      - { label: "Browser", icon: "", type: "bouton", visible: true,
           action: { type: "launch", target: "chrome.exe" } }
-      - { label: "Capture", icon: "", type: "bouton", visible: true,
+
+      - { label: "Screenshot", icon: "", type: "bouton", visible: true,
           action: { type: "keys", target: ["ctrl", "shift", "s"] } }
-      - { label: "Lecture", icon: "play_arrow", type: "bouton", visible: true,
+
+      - { label: "Play / Pause", icon: "play_arrow", type: "bouton", visible: true,
           action: { type: "media", target: "play_pause" } }
+
       - { label: "Volume", icon: "volume_up", type: "barre", visible: true,
           ha_entity: "sensor.pc_volume" }
-      - { label: "Salon", icon: "wb_sunny", type: "texte", visible: true,
-          ha_entity: "sensor.temperature_salon" }
-      - { label: "Lumiere", icon: "lightbulb_outline", type: "bouton", visible: true,
-          action: { type: "home_assistant", domain: "light", service: "toggle", entity_id: "light.bureau" } }
-      - { label: "Slot 8", icon: "", type: "bouton", visible: true, action: { type: "none", target: "" } }
-      - { label: "Slot 9", icon: "", type: "bouton", visible: true, action: { type: "none", target: "" } }
-      - { label: "Slot 10", icon: "", type: "bouton", visible: true, action: { type: "none", target: "" } }
-      - { label: "Slot 11", icon: "", type: "bouton", visible: true, action: { type: "none", target: "" } }
-      - { label: "Slot 12", icon: "", type: "bouton", visible: true, action: { type: "none", target: "" } }
-      - { label: "Slot 13", icon: "", type: "bouton", visible: false, action: { type: "none", target: "" } }
-      - { label: "Slot 14", icon: "", type: "bouton", visible: false, action: { type: "none", target: "" } }
-      - { label: "Slot 15", icon: "", type: "bouton", visible: false, action: { type: "none", target: "" } }
-      - { label: "Slot 16", icon: "", type: "bouton", visible: false, action: { type: "none", target: "" } }
-    # 3 entrees, une par encodeur. Chacune a 3 actions possibles (memes
-    # types que ci-dessus, format compact "domaine.service:entite" pour
-    # home_assistant quand utilise directement dans l'appli PC via la page
-    # web - ici en YAML on utilise le meme format dict que les slots).
+
+      - { label: "Room temperature", icon: "wb_sunny", type: "texte", visible: true,
+          ha_entity: "sensor.room_temperature" }
+
+      - { label: "Office light", icon: "lightbulb_outline", type: "bouton", visible: true,
+          action: { type: "home_assistant", domain: "light", service: "toggle", entity_id: "light.office" } }
+
+      - { label: "Slot 8", icon: "", type: "bouton", visible: true,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 9", icon: "", type: "bouton", visible: true,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 10", icon: "", type: "bouton", visible: true,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 11", icon: "", type: "bouton", visible: true,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 12", icon: "", type: "bouton", visible: true,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 13", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 14", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 15", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 16", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 17", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 18", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 19", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 20", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 21", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 22", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 23", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 24", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 25", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 26", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 27", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 28", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 29", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 30", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 31", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 32", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 33", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 34", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 35", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
+      - { label: "Slot 36", icon: "", type: "bouton", visible: false,
+          action: { type: "none", target: "" } }
+
     encoders:
       - clockwise: { type: "media", target: "vol_up" }
         anticlockwise: { type: "media", target: "vol_down" }
         press: { type: "media", target: "mute" }
-      - clockwise: { type: "none", target: "" }
-        anticlockwise: { type: "none", target: "" }
-        press: { type: "none", target: "" }
+
       - clockwise: { type: "none", target: "" }
         anticlockwise: { type: "none", target: "" }
         press: { type: "none", target: "" }
 
-  # Exemple de profil qui bascule automatiquement des que "obs64.exe" passe
-  # au premier plan (trigger.process = nom du fichier .exe, insensible a la
-  # casse - le bouton "Detecter l'appli active" de la page web le remplit
-  # automatiquement). Supprimez ce bloc si vous n'avez besoin que d'un
-  # seul profil "Defaut".
-  - name: "OBS"
-    trigger: { process: "obs64.exe" }
-    slots:
-      - { label: "Micro", icon: "mic", type: "bouton", visible: true,
-          action: { type: "home_assistant", domain: "switch", service: "toggle", entity_id: "switch.micro_obs" } }
-      # ... completez les 15 emplacements restants depuis la page web.
-    encoders:
-      - clockwise: { type: "none", target: "" }
-        anticlockwise: { type: "none", target: "" }
-        press: { type: "none", target: "" }
-      - clockwise: { type: "none", target: "" }
-        anticlockwise: { type: "none", target: "" }
-        press: { type: "none", target: "" }
       - clockwise: { type: "none", target: "" }
         anticlockwise: { type: "none", target: "" }
         press: { type: "none", target: "" }
 
-# Optionnel : endpoint HTTP bonus pour declencher une action depuis Home
-# Assistant en plus du fonctionnement direct (voir pc-app/README.md). Laissez
-# vide pour desactiver.
+# Optional HTTP receiver allowing Home Assistant to trigger actions on the PC.
+# Leave the token empty to disable it.
 receiver:
   token: ""
   port: 8765

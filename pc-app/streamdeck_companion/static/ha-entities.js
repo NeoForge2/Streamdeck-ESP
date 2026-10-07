@@ -17,7 +17,7 @@ function loadHaEntitiesIfNeeded(callback) {
     })
     .catch(() => {
       haEntities = [];
-      callback("Impossible de contacter l'appli.");
+      callback("Unable to contact the application.");
     });
 }
 

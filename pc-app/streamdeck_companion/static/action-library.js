@@ -29,7 +29,7 @@
     if (!actions.length) {
       const empty = document.createElement("p");
       empty.className = "hint";
-      empty.textContent = "Aucune action trouvee.";
+      empty.textContent = "No actions found.";
       list.appendChild(empty);
       return;
     }

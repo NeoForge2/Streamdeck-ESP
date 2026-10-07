@@ -18,7 +18,7 @@ function loadAudioDevicesIfNeeded(callback) {
     })
     .catch(() => {
       audioDevices = [];
-      callback("Impossible de contacter l'appli.");
+      callback("Unable to contact the application.");
     });
 }
 

@@ -119,7 +119,7 @@ function addCustomApp() {
       appLibrary.custom = data.apps || appLibrary.custom;
       selectApp({ name: data.name, target: data.target });
     })
-    .catch(() => alert("Impossible de contacter l'appli pour ouvrir le selecteur de fichier."));
+    .catch(() => alert("Unable to contact the application to open the file picker."));
 }
 
 function removeCustomApp(target) {

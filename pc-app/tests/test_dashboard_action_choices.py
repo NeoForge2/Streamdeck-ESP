@@ -31,7 +31,7 @@ class DashboardActionChoicesTests(unittest.TestCase):
 
     def test_labels_come_from_action_library(self) -> None:
         labels = choice_labels(self.catalog)
-        self.assertEqual(labels["none"], "Aucune")
+        self.assertEqual(labels["none"], "None")
         self.assertEqual(labels["launch"], "Lancer une application")
         self.assertEqual(labels["navigation"], "Navigation Streamdeck")
 

@@ -18,7 +18,7 @@ class DashboardV2ApiTests(unittest.TestCase):
         self.assertIn("navigation", context["action_types"])
         self.assertIn("multi_action", context["action_types"])
         self.assertIn("ha_adjust", context["encoder_action_types"])
-        self.assertEqual(context["action_type_labels"]["none"], "Aucune")
+        self.assertEqual(context["action_type_labels"]["none"], "None")
 
     def test_payload_exposes_property_inspector_and_context_choices(self) -> None:
         payload = dashboard_action_catalog_payload()

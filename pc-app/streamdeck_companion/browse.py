@@ -27,7 +27,7 @@ def browse_for_executable() -> str | None:
     root.withdraw()
     root.attributes("-topmost", True)
     try:
-        path = filedialog.askopenfilename(title="Choisir une application", filetypes=_FILETYPES)
+        path = filedialog.askopenfilename(title="Choose an application", filetypes=_FILETYPES)
     finally:
         root.destroy()
     if not path:
